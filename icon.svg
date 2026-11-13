@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="42%" r="70%">
+      <stop offset="0" stop-color="#8f1d14"/><stop offset=".55" stop-color="#5a0f0a"/><stop offset="1" stop-color="#260504"/>
+    </radialGradient>
+    <radialGradient id="halo" cx="50%" cy="50%" r="50%">
+      <stop offset="0" stop-color="#ffd27a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd27a" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbe7a6"/><stop offset=".5" stop-color="#d9a640"/><stop offset="1" stop-color="#f3d27c"/>
+    </linearGradient>
+    <linearGradient id="goldH" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#b8862b"/><stop offset=".45" stop-color="#f6d98a"/><stop offset="1" stop-color="#a87a22"/>
+    </linearGradient>
+    <linearGradient id="lac" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#7e1616"/><stop offset="1" stop-color="#3c0707"/>
+    </linearGradient>
+    <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#3a1d0e"/><stop offset="1" stop-color="#1a0b05"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#bg)"/>
+  <!-- 遠山 -->
+  <path d="M0 400 C60 360 95 372 140 345 C185 318 215 352 256 336 C300 318 330 352 380 330 C430 310 470 342 512 330 L512 512 L0 512Z" fill="#1a0403" opacity=".45"/>
+  <path d="M0 438 C70 410 120 428 180 405 C240 384 290 418 350 400 C410 384 460 410 512 398 L512 512 L0 512Z" fill="#120302" opacity=".55"/>
+  <!-- 光暈 -->
+  <circle cx="256" cy="250" r="190" fill="url(#halo)"/>
+  <!-- 牌位頂飾 -->
+  <circle cx="256" cy="104" r="11" fill="url(#gold)"/>
+  <path d="M168 168 A88 58 0 0 1 344 168 Z" fill="url(#gold)" stroke="#8a5a16" stroke-width="2"/>
+  <path d="M192 166 A64 40 0 0 1 320 166 Z" fill="#6e1212"/>
+  <!-- 牌身 -->
+  <rect x="180" y="166" width="152" height="232" rx="3" fill="url(#lac)" stroke="url(#goldH)" stroke-width="7"/>
+  <rect x="193" y="180" width="126" height="204" fill="none" stroke="#d4a843" stroke-width="2"/>
+  <path d="M186.34 0" fill="none"/>
+  <g transform="translate(186.34 343.84) scale(0.135 -0.135)"><path d="M773 578 649 638C634 591 604 501 582 447L592 438C635 475 703 534 736 567C760 563 770 569 773 578ZM260 631 250 625C282 582 315 516 320 459C404 388 495 559 260 631ZM554 688H398C462 713 463 840 249 849L241 843C278 807 319 749 333 696L350 688H236L108 736V314H129C187 314 222 340 222 348V378H778V325H798C835 325 892 347 892 355V647C908 649 919 656 924 663L820 742L769 688H602C653 719 708 757 745 784C767 781 780 788 785 800L627 855C611 807 585 739 563 688ZM222 659H447V406H222ZM778 659V406H554V659ZM663 266V154H340V266ZM340 -49V-20H663V-78H683C722 -78 782 -57 784 -50V246C804 251 817 259 823 267L708 355L653 294H347L220 344V-87H238C288 -87 340 -60 340 -49ZM340 125H663V9H340Z" fill="url(#gold)"/></g>
+  <!-- 底座 -->
+  <rect x="170" y="396" width="172" height="14" fill="url(#goldH)"/>
+  <rect x="156" y="408" width="200" height="24" rx="2" fill="url(#wood)" stroke="#8a5a16" stroke-width="1.5"/>
+</svg>

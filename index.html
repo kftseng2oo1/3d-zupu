@@ -1,0 +1,1603 @@
+<!DOCTYPE html>
+<html lang="zh-Hant-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#2a1a08">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="3D 祠堂">
+<meta name="description" content="龍山派曾氏族譜 3D 立體世系祠堂：神位、沿革、字輩、塔位、上香與語音口述">
+<title>龍山派 曾氏族譜 · 3D 祠堂</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1a0f00; --gold:#b8860b; --gold-l:#e2bd62; --red:#8b1a1a; --paper:#ece0c4;
+    --font:'Noto Serif TC','Songti TC','PMingLiU',serif;
+    --sb:env(safe-area-inset-bottom,0px); --st:env(safe-area-inset-top,0px);
+  }
+  *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{height:100%;overflow:hidden;background:var(--paper);font-family:var(--font);color:var(--ink);
+    -webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+  canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
+
+  /* 標題 */
+  #title{position:fixed;top:calc(var(--st) + 14px);left:16px;pointer-events:none;z-index:5}
+  #title h1{font-size:20px;font-weight:900;color:var(--red);letter-spacing:.25em}
+  #title p{font-size:11px;color:#7a5a2a;letter-spacing:.3em;margin-top:2px}
+  #genTag{position:fixed;top:calc(var(--st) + 14px);right:16px;z-index:5;pointer-events:none;
+    writing-mode:vertical-rl;font-weight:900;font-size:18px;letter-spacing:.3em;color:var(--gold);
+    background:rgba(42,26,8,.82);padding:10px 6px;border:1px solid var(--gold);border-radius:3px;opacity:0;transition:opacity .4s}
+  #genTag.on{opacity:1}
+
+  /* 印章 */
+  #seal{position:fixed;right:14px;bottom:calc(var(--sb) + 76px);z-index:5;pointer-events:none;
+    width:58px;height:58px;border:3px solid #a82020;border-radius:4px;color:#a82020;
+    display:flex;align-items:center;justify-content:center;transform:rotate(-6deg);
+    font-weight:900;font-size:13px;line-height:1.15;text-align:center;background:rgba(236,224,196,.55)}
+
+  /* 底部工具列 */
+  #bar{position:fixed;left:0;right:0;bottom:0;z-index:6;padding:10px 10px calc(var(--sb) + 10px);
+    background:linear-gradient(to top,rgba(42,26,8,.92),rgba(42,26,8,.75));border-top:1px solid var(--gold);
+    display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  #bar::-webkit-scrollbar{display:none}
+  #bar button{flex:0 0 auto;min-width:38px;height:40px;padding:0 10px;border:1px solid #8b6020;border-radius:3px;
+    background:#3d2006;color:var(--gold-l);font-family:var(--font);font-size:15px;font-weight:700;cursor:pointer}
+  #bar button.on{background:var(--gold);color:#2a1505;border-color:var(--gold-l)}
+  #bar .sep{flex:0 0 1px;background:#8b6020;margin:4px 2px}
+
+  /* 資料卡 */
+  #card{position:fixed;left:50%;bottom:calc(var(--sb) + 74px);z-index:7;width:min(92vw,360px);
+    transform:translate(-50%,20px);opacity:0;pointer-events:none;transition:all .35s ease;
+    background:linear-gradient(170deg,#faf3e0,#ede0b8);border:2px solid var(--gold);border-radius:4px;
+    box-shadow:0 0 0 4px rgba(61,32,6,.85),0 10px 30px rgba(0,0,0,.45);padding:16px 18px 14px}
+  #card.on{opacity:1;transform:translate(-50%,0);pointer-events:auto}
+  #card .hd{display:flex;align-items:baseline;gap:10px;border-bottom:1px solid #c9a045;padding-bottom:8px;margin-bottom:8px}
+  #card .nm{font-size:26px;font-weight:900;color:var(--red);letter-spacing:.12em}
+  #card .gn{font-size:13px;color:#7a5a2a;letter-spacing:.2em}
+  #card .tg{font-size:12px;color:#faf3e0;background:var(--red);padding:2px 8px;border-radius:2px;margin-left:auto}
+  #card dl{display:grid;grid-template-columns:4.2em 1fr;row-gap:6px;font-size:15px}
+  #card dt{color:#7a5a2a}
+  #card dd{color:var(--ink);font-weight:700}
+  #card{max-height:62vh;overflow-y:auto}
+  #card .av{width:44px;height:54px;object-fit:cover;border:2px solid var(--gold);border-radius:2px;align-self:center}
+  #card .bio{margin-top:10px;padding-top:8px;border-top:1px dashed #c9a045;font-size:14px;line-height:1.75;color:#3d2b1a;white-space:pre-wrap}
+  #card .btns{display:flex;gap:8px;margin-top:12px}
+  #card .tw{flex:1;height:38px;border:1px solid var(--gold);border-radius:3px;background:#f3e3b8;color:#5a0d0d;font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:.15em;cursor:pointer}
+  #card .flip{flex:2;height:38px;border:1px solid var(--gold);border-radius:3px;background:#3d2006;color:var(--gold-l);font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:.2em;cursor:pointer}
+  #card dd{word-break:break-all}
+  #card.mini dl,#card.mini .bio{display:none}
+  #card.mini .hd{border-bottom:0;margin-bottom:0}
+  #card .x{position:absolute;top:6px;right:8px;border:0;background:none;font-size:22px;color:#7a5a2a;cursor:pointer;padding:4px}
+
+  /* 開場卷軸 */
+  #intro{position:fixed;inset:0;z-index:20;background:radial-gradient(ellipse at center,#3d2006,#1a0d03);
+    display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .9s}
+  #intro.hide{opacity:0;pointer-events:none}
+  .scroll{display:flex;flex-direction:column;align-items:center}
+  .rod{width:min(62vw,250px);height:16px;border-radius:8px;
+    background:linear-gradient(to bottom,#7a4a1a,#c99a3a 40%,#5a3010);box-shadow:0 3px 8px rgba(0,0,0,.6);position:relative}
+  .rod::before,.rod::after{content:'';position:absolute;top:-3px;width:14px;height:22px;border-radius:4px;background:#d4a843}
+  .rod::before{left:-10px}.rod::after{right:-10px}
+  .paper{width:min(56vw,224px);height:0;overflow:hidden;animation:unroll 1.8s .3s cubic-bezier(.6,.05,.3,1) forwards;
+    background:linear-gradient(170deg,#faf3e0,#ede0b8);border-left:2px solid var(--gold);border-right:2px solid var(--gold);
+    display:flex;align-items:center;justify-content:center;position:relative}
+  @keyframes unroll{to{height:min(60vh,440px)}}
+  .paper .ttl{writing-mode:vertical-rl;font-size:clamp(28px,8vw,40px);font-weight:900;color:var(--red);letter-spacing:.35em;line-height:1.6}
+  .paper .sub{position:absolute;bottom:18px;left:18px;writing-mode:vertical-rl;font-size:12px;color:#7a5a2a;letter-spacing:.3em}
+  .paper .stamp{position:absolute;bottom:20px;right:16px;width:40px;height:40px;border:2px solid #a82020;color:#a82020;
+    font-size:10px;font-weight:900;display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.1}
+  #intro .hint{margin-top:22px;color:#c9a045;font-size:13px;letter-spacing:.4em;opacity:.8}
+  #intro .err{margin-top:14px;color:#ffb0a0;font-size:13px;max-width:80vw;text-align:center;display:none}
+
+  /* 祭祀 */
+  #riteBanner{position:fixed;left:50%;top:calc(var(--st) + 64px);transform:translateX(-50%);z-index:6;display:none;cursor:pointer;
+    background:linear-gradient(90deg,#5a0d0d,#8b1a1a,#5a0d0d);border:1px solid var(--gold-l);border-radius:3px;padding:7px 16px;text-align:center;
+    box-shadow:0 0 18px rgba(255,190,80,.55);max-width:86vw}
+  #riteBanner.on{display:block;animation:glow 2.4s ease-in-out infinite}
+  @keyframes glow{50%{box-shadow:0 0 30px rgba(255,200,90,.9)}}
+  #riteBanner b{display:block;color:#f6d98a;font-size:15px;letter-spacing:.12em}
+  #riteBanner span{display:block;color:#f3e3b8;font-size:12px;margin-top:2px}
+  #toast{position:fixed;left:50%;top:calc(var(--st) + 128px);transform:translate(-50%,-10px);z-index:40;opacity:0;pointer-events:none;transition:all .3s;
+    background:rgba(42,26,8,.92);color:var(--gold-l);border:1px solid var(--gold);padding:9px 16px;border-radius:3px;font-size:14px;max-width:88vw;text-align:center}
+  #toast.on{opacity:1;transform:translate(-50%,0)}
+  .dlg{position:fixed;inset:0;z-index:35;background:rgba(20,10,2,.7);display:none;align-items:center;justify-content:center;padding:20px}
+  .dlg.on{display:flex}
+  .dlg .in{width:min(90vw,360px);background:linear-gradient(170deg,#faf3e0,#ede0b8);border:2px solid var(--gold);border-radius:4px;padding:18px;box-shadow:0 0 0 4px rgba(61,32,6,.85)}
+  .dlg h4{color:var(--red);font-size:17px;font-weight:900;margin-bottom:12px;letter-spacing:.08em}
+  .dlg input{width:100%;font-family:var(--font);font-size:16px;padding:9px 10px;border:1px solid #c9a045;border-radius:3px;background:#fffaf0;margin-bottom:10px;-webkit-user-select:text;user-select:text}
+  .dlg .row{display:flex;gap:8px;flex-wrap:wrap}
+  .dlg button{flex:1;min-width:80px;height:40px;font-family:var(--font);font-size:15px;font-weight:700;border-radius:3px;border:1px solid var(--gold);background:#3d2006;color:var(--gold-l)}
+  .dlg button.no{background:#f3e3b8;color:#5a0d0d}
+  #recBox .tm{text-align:center;font-size:20px;font-weight:900;color:#5a0d0d;margin:6px 0 10px;letter-spacing:.1em}
+  #recBox audio{width:100%;margin-bottom:10px;display:none}
+  #recBox .stop,#recBox .redo,#recBox .ok{display:none}
+  #recBox[data-st="rec"] .go,#recBox[data-st="done"] .go,#recBox[data-st="up"] .go{display:none}
+  #recBox[data-st="rec"] .stop{display:block;background:#8b1a1a}
+  #recBox[data-st="rec"] .tm{color:#c0392b}
+  #recBox[data-st="done"] .redo,#recBox[data-st="done"] .ok{display:block}
+  #recBox[data-st="done"] audio{display:block}
+  #card .voices h5{font-size:13px;color:#7a5a2a;margin:10px 0 4px;letter-spacing:.2em}
+  #card .vrow{display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px dashed #d9c48a}
+  #card .vrow span{flex:1;display:flex;flex-direction:column}
+  #card .vrow b{font-size:14px;color:#2a1a08}
+  #card .vrow small{font-size:12px;color:#7a5a2a}
+  #card .vplay{width:34px;height:34px;border-radius:50%;border:1px solid var(--gold);background:#3d2006;color:var(--gold-l);font-size:13px}
+  #card .vplay.on{background:var(--gold);color:#3d2006}
+  #card .vdel{font-family:var(--font);font-size:12px;border:0;background:none;color:#8b1a1a;text-decoration:underline}
+  #card .inc{flex:1;height:38px;border:1px solid #8b1a1a;border-radius:3px;background:#8b1a1a;color:#f6d98a;font-family:var(--font);font-size:15px;font-weight:900;letter-spacing:.2em}
+  #card .rec{flex:1;height:38px;border:1px solid var(--gold);border-radius:3px;background:#f3e3b8;color:#5a0d0d;font-family:var(--font);font-size:15px;font-weight:700;letter-spacing:.1em}
+  .rstat{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:6px 0 12px}
+  .rstat div{background:#fbf4e2;border:1px solid #c9a045;border-radius:3px;text-align:center;padding:8px 0}
+  .rstat b{display:block;font-size:24px;color:#8b1a1a}.rstat small{font-size:12px;color:#7a5a2a}
+  .rbtn{width:100%;height:44px;font-family:var(--font);font-size:16px;font-weight:900;letter-spacing:.2em;border:1px solid #8b1a1a;background:#8b1a1a;color:#f6d98a;border-radius:3px}
+  .rrow{display:flex;align-items:baseline;gap:8px;padding:8px 2px;border-bottom:1px dashed #d9c48a;font-size:15px;cursor:pointer}
+  .rrow b{color:#2a1a08;white-space:nowrap}.rrow span{flex:1;color:#5a3a10;font-size:14px}.rrow em{font-style:normal;font-size:12px;color:#7a5a2a;white-space:nowrap}
+  .rrow em.hot{color:#fff;background:#8b1a1a;padding:1px 6px;border-radius:2px}
+  .rnote{font-size:12px!important;color:#7a5a2a!important;margin-top:12px}
+
+  /* 卷軸展讀 */
+  #scrollReader{position:fixed;inset:0;z-index:25;background:rgba(20,10,2,.88);display:none;flex-direction:column;align-items:center;justify-content:center;padding:calc(var(--st) + 16px) 14px calc(var(--sb) + 16px)}
+  #scrollReader.on{display:flex;animation:fadeIn .35s}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  #scrollReader .rodr{width:min(96vw,560px);height:16px;border-radius:8px;background:linear-gradient(to bottom,#7a4a1a,#c99a3a 40%,#5a3010);box-shadow:0 3px 8px rgba(0,0,0,.6);flex:0 0 auto}
+  #scrollReader .body{width:min(90vw,520px);flex:0 1 auto;max-height:calc(100vh - 150px);overflow-y:auto;-webkit-overflow-scrolling:touch;
+    background:linear-gradient(170deg,#faf3e0,#ede0b8);border-left:2px solid var(--gold);border-right:2px solid var(--gold);padding:20px 22px;user-select:text;-webkit-user-select:text}
+  #scrollReader h2{color:var(--red);font-size:22px;font-weight:900;letter-spacing:.2em;text-align:center;margin-bottom:12px}
+  #scrollReader h3{color:#7a1010;font-size:17px;font-weight:900;margin:18px 0 6px;border-left:4px solid var(--gold);padding-left:8px}
+  #scrollReader p{font-size:16px;line-height:1.9;color:#2a1a08;margin-bottom:8px;text-align:justify}
+  #scrollReader .close{margin-top:14px;font-family:var(--font);font-size:15px;padding:8px 28px;border:1px solid var(--gold);background:#3d2006;color:var(--gold-l);border-radius:3px}
+  .zbgrid{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-top:10px}
+  .zb{border:1px solid #c9a045;background:#fbf4e2;border-radius:3px;padding:6px 2px;text-align:center}
+  .zb b{display:block;font-size:26px;color:#8b1a1a;font-weight:900}
+  .zb small{display:block;font-size:11px;color:#7a5a2a}
+  .zb em{display:block;font-style:normal;font-size:10px;color:#3d2b1a;margin-top:2px;line-height:1.3}
+  .zb.on{background:#8b1a1a;border-color:#8b1a1a}.zb.on b,.zb.on small,.zb.on em{color:#f6d98a}
+
+  /* 海報輸出 */
+  #poster{position:fixed;inset:0;z-index:30;background:rgba(20,10,2,.92);display:none;flex-direction:column;
+    align-items:center;justify-content:center;padding:20px}
+  #poster.on{display:flex}
+  #poster img{max-width:92vw;max-height:72vh;border:2px solid var(--gold);-webkit-touch-callout:default}
+  #poster p{color:var(--gold-l);margin:12px 0;font-size:14px;letter-spacing:.2em}
+  #poster .btns{display:flex;gap:10px}
+  #poster a,#poster button{font-family:var(--font);font-size:15px;padding:8px 18px;border:1px solid var(--gold);
+    background:#3d2006;color:var(--gold-l);border-radius:3px;text-decoration:none}
+</style>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+</head>
+<body>
+<canvas id="c"></canvas>
+
+<div id="title"><h1>龍山派 曾氏族譜</h1><p>立體世系祠堂</p></div>
+<div id="genTag"></div>
+<div id="seal">曾氏<br>龍山<br>族譜</div>
+
+<div id="card">
+  <button class="x" aria-label="關閉">×</button>
+  <div class="hd"><img class="av" alt=""><span class="nm"></span><span class="gn"></span><span class="tg"></span></div>
+  <dl></dl>
+  <p class="bio"></p>
+  <div class="voices"></div>
+  <div class="btns"><button class="inc">上 香</button><button class="rec">錄音口述</button></div>
+  <div class="btns"><button class="flip">翻面看生平</button><button class="tw">看塔位</button></div>
+</div>
+
+<div id="bar"></div>
+
+<div id="intro">
+  <div class="scroll">
+    <div class="rod"></div>
+    <div class="paper">
+      <div class="ttl">龍山派<br>曾氏族譜</div>
+      <div class="sub">世系圖</div>
+      <div class="stamp">曾氏<br>龍山</div>
+    </div>
+    <div class="rod"></div>
+  </div>
+  <div class="hint">輕觸略過</div>
+  <div class="err" id="err">3D 元件載入失敗，請確認網路連線後重新整理。</div>
+</div>
+
+<div id="riteBanner"></div>
+<div id="toast"></div>
+<div id="askBox" class="dlg"><div class="in"><h4></h4><input maxlength="20"><div class="row"><button class="no">取消</button><button class="ok">確定</button></div></div></div>
+<div id="recBox" class="dlg" data-st="idle"><div class="in">
+  <h4></h4>
+  <input class="title" maxlength="24" placeholder="標題（例：阿公講渡台的故事）">
+  <div class="tm"></div>
+  <audio controls playsinline></audio>
+  <div class="row">
+    <button class="no">關閉</button>
+    <button class="go">● 開始錄音</button><button class="stop">■ 停止</button>
+    <button class="redo">重錄</button><button class="ok">上傳保存</button>
+  </div>
+</div></div>
+
+<div id="scrollReader">
+  <div class="rodr"></div>
+  <div class="body"></div>
+  <div class="rodr"></div>
+  <button class="close">收起</button>
+</div>
+
+<div id="poster">
+  <img alt="族譜海報">
+  <p>長按圖片即可儲存</p>
+  <div class="btns"><a download="曾氏族譜.png">下載</a><button>關閉</button></div>
+</div>
+
+<script>
+  // three.js 若因網路失敗沒有啟動，提示使用者
+  setTimeout(()=>{ if(!window.__zupuReady) document.getElementById('err').style.display='block'; }, 12000);
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* ================= 族譜資料 =================
+   內建資料（與紀念堂預設一致）；紀念堂「祖先名冊」填寫的內容會自動覆蓋/補上。
+   主脈：{id, name, gen, parent, tag?, tablet?, birth?, death?, bio?, avatar?, alias?, alive?}
+   配偶：{id, name, spouseOf, birth?, death?, datesText?, tablet?, empty?}
+*/
+const PEOPLE = [
+  { id:'p1',  name:'曾虎',     gen:1, tag:'來台祖', tablet:'顯一世祖考曾公諱虎之神位' },
+  { id:'p2',  name:'曾奎德',   gen:2, parent:'p1', tablet:'顯二世祖考諱奎德之神位' },
+  { id:'p3',  name:'曾武六',   gen:3, parent:'p2', tablet:'顯三世祖考諱武六之神位' },
+  { id:'p4',  name:'曾呈獅',   gen:4, parent:'p3', tablet:'顯四世祖考曾公諱呈獅之神位' },
+  { id:'s4',  name:'吳香',     spouseOf:'p4' },
+  { id:'p5',  name:'曾水陀',   gen:5, parent:'p4', birth:'1874', tablet:'顯五世祖考曾公諱水陀之神位' },
+  { id:'s5',  name:'許羿（藝）', spouseOf:'p5', birth:'1878.08.03', death:'1916.05.26' },
+  { id:'p6a', name:'曾瑞麟',   gen:6, parent:'p5', birth:'1900', tablet:'顯六世祖考曾公諱瑞麟之神位' },
+  { id:'s6a', name:'曾楊玉枝', spouseOf:'p6a', birth:'1904.08.11', death:'1983.04.08' },
+  { id:'p6b', name:'曾實',     gen:6, parent:'p5', tablet:'顯六世祖考曾公諱實之神位' },
+  { id:'s6b', name:'無配偶',   spouseOf:'p6b', empty:true },
+  { id:'p7',  name:'曾人定',   gen:7, parent:'p6a', birth:'1934', tablet:'顯七世祖考曾公諱人定之神位' },
+  { id:'s7',  name:'曾張月嬌', spouseOf:'p7', birth:'1934.01.10', death:'2021.11.18' },
+];
+
+const CN = ['','一','二','三','四','五','六','七','八','九','十','十一','十二','十三','十四','十五'];
+const FONT = '"Noto Serif TC","Songti TC","PMingLiU",serif';
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const norm = s => (s || '').replace(/^曾/, '').trim();
+const fmtDate = d => (d || '').trim().replace(/-/g, '.');
+
+/* ---------- 同步紀念堂（index.html）的祖先名冊 ----------
+   同網域讀取 localStorage 'ancestorApp_v28'：
+   已有的人 → 補上神位文字、生卒忌日、生平、照片、字號、配偶
+   新增的人 → 依「上一代」接到世系；在世者做成家族樹卡片（不立牌位） */
+let MEM = null;
+(function mergeFromMemorial() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem('ancestorApp_v28') || 'null'); } catch (e) { return; }
+  if (!data || !Array.isArray(data.ancestors)) return;
+  MEM = data;
+  const find = n => n && PEOPLE.find(p => !p.spouseOf && norm(p.name) === norm(n));
+  const apply = (p, a) => {
+    p.mid = a.id;
+    ['alias', 'bio', 'avatar'].forEach(k => { if (a[k]) p[k] = a[k]; });
+    if (a.tablet && !a.isAlive) p.tablet = a.tablet;
+    if (a.birth) p.birth = fmtDate(a.birth);
+    if (a.death) { p.death = fmtDate(a.death); p.deathLunar = a.deathCalendar === 'lunar'; }
+    p.alive = !!a.isAlive;
+    if (a.spouse) {
+      const sp = PEOPLE.find(s => s.spouseOf === p.id);
+      if (!sp) PEOPLE.push({ id: 'ms_' + p.id, name: a.spouse, spouseOf: p.id, datesText: a.spouseDates || '' });
+      else if (sp.empty) Object.assign(sp, { name: a.spouse, empty: false, datesText: a.spouseDates || '' });
+      else if (a.spouseDates && !sp.birth && !sp.death) sp.datesText = a.spouseDates;
+    }
+  };
+  data.ancestors.filter(a => a && a.name && a.gen).sort((a, b) => a.gen - b.gen).forEach(a => {
+    const hit = find(a.name) || find(a.alias);
+    if (hit) { apply(hit, a); return; }
+    const parent = find(a.parent);
+    if (!parent || +parent.gen !== +a.gen - 1) return;
+    const p = { id: 'm_' + a.id, name: a.name.startsWith('曾') ? a.name : '曾' + a.name, gen: +a.gen, parent: parent.id };
+    PEOPLE.push(p); apply(p, a);
+  });
+})();
+
+/* ---------- 神位文字（未填則依慣例產生） ---------- */
+function tabletText(p) {
+  if (p.empty) return '無配偶';
+  if (p.tablet) return p.tablet;
+  if (p.role === 'main') return `顯${CN[p.gen]}世祖考曾公諱${norm(p.name)}之神位`;
+  const n = p.name.replace(/（.*?）/g, '');
+  const sur = (n.length >= 3 && n.startsWith('曾')) ? n[1] : n[0];
+  return `顯${CN[p.gen]}世祖妣曾門${sur}氏孺人之神位`;
+}
+/* 生卒顯示 */
+function lifeLines(p) {
+  if (p.alive) return [p.birth ? p.birth + (p.birth.length === 4 ? ' 年生' : ' 生') : '', '在世'].filter(Boolean);
+  if (p.datesText) return [p.datesText];
+  const b = p.birth ? (p.birth.length === 4 ? p.birth + ' 年生' : p.birth) : '';
+  const d = p.death ? (p.deathLunar ? '農曆 ' : '') + p.death : '';
+  if (b && d) return [b, '— ' + d];
+  if (b) return [b, '仙逝'];
+  if (d) return ['卒 ' + d];
+  return null;
+}
+
+/* ---------- 關係整理 ---------- */
+const byId = Object.fromEntries(PEOPLE.map(p => [p.id, p]));
+PEOPLE.forEach(p => {
+  if (p.spouseOf) { const m = byId[p.spouseOf]; p.gen = m.gen; p.role = 'spouse'; m.spouse = p; }
+  else p.role = 'main';
+});
+PEOPLE.forEach(p => { if (p.spouseOf && byId[p.spouseOf].alive) p.alive = true; });
+PEOPLE.forEach(p => { p.lines = lifeLines(p); p.tabletText = tabletText(p); });
+const mains = PEOPLE.filter(p => p.role === 'main');
+mains.forEach(p => p.children = mains.filter(c => c.parent === p.id));
+const root = mains.find(p => !p.parent);
+const MAX_GEN = Math.max(...PEOPLE.map(p => p.gen));
+
+/* ---------- 自動佈局 ---------- */
+const TW = 1.1, CG = 0.45, SIB = 1.3, GEN_H = 4.4;
+const unitW = p => p.spouse ? TW * 2 + CG : TW;
+function measure(p) {
+  const cw = p.children.reduce((s, c) => s + measure(c), 0) + Math.max(0, p.children.length - 1) * SIB;
+  p.cw = cw; p.w = Math.max(unitW(p), cw); return p.w;
+}
+function place(p, left) {
+  p.cx = left + p.w / 2;
+  let x = p.cx - p.cw / 2;
+  p.children.forEach(c => { place(c, x); x += c.w + SIB; });
+  const off = p.spouse ? (TW + CG) / 2 : 0;
+  p.x = p.cx - off; p.y = -(p.gen - 1) * GEN_H;
+  if (p.spouse) { p.spouse.x = p.cx + off; p.spouse.y = p.y; }
+}
+measure(root); place(root, -root.w / 2);
+
+/* ---------- 字型就緒後才畫牌位文字（iOS 必要） ---------- */
+async function waitFonts() {
+  const txt = PEOPLE.map(p => p.name + p.tabletText + (p.tag || '') + (p.lines || []).join('') + (p.bio || '') + (p.alias || '')).join('')
+            + HALL.plaque + HALL.plaqueSub + HALL.couplet.join('') + HALL.zibei + '龍山字輩大宗曾氏沿革輕觸展讀塔位側殿樓號口湖鄉公所靈骨塔蚵寮新舊' + historyText().split('\n').filter(s => /^[一二三四五六七八九十]+、/.test(s)).join('') + '第一二三四五六七八九十世配偶︵︶無—年生仙逝之本支在世農曆卒生平待補於紀念堂祖先名冊填寫字號0123456789.';
+  try {
+    await Promise.race([
+      Promise.all([
+        document.fonts.load(`900 64px "Noto Serif TC"`, txt),
+        document.fonts.load(`700 32px "Noto Serif TC"`, txt),
+      ]),
+      sleep(4500)
+    ]);
+  } catch (e) {}
+}
+
+/* ================= 場景 ================= */
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight, false);
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+const PAPER = new THREE.Color('#ece0c4');
+const scene = new THREE.Scene();
+scene.background = PAPER;
+scene.fog = new THREE.Fog(PAPER, 45, 150);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+const camera = new THREE.PerspectiveCamera(45, innerWidth / innerHeight, 0.1, 400);
+camera.position.set(0, 3, 12);
+
+scene.add(new THREE.HemisphereLight('#fff3dc', '#4a3020', 1.1));
+const sun = new THREE.DirectionalLight('#ffe2b0', 1.6);
+sun.position.set(6, 10, 12); scene.add(sun);
+
+const controls = new OrbitControls(camera, canvas);
+controls.enableDamping = true; controls.dampingFactor = 0.08;
+controls.screenSpacePanning = true;
+controls.minDistance = 3; controls.maxDistance = 70;
+controls.minPolarAngle = Math.PI * 0.22; controls.maxPolarAngle = Math.PI * 0.78;
+controls.minAzimuthAngle = -Math.PI / 3; controls.maxAzimuthAngle = Math.PI / 3;
+
+/* ---------- 共用材質 ---------- */
+const M = {
+  woodDark: new THREE.MeshStandardMaterial({ color: '#2b160c', roughness: .55, envMapIntensity: .5 }),
+  gold:     new THREE.MeshStandardMaterial({ color: '#c99a3a', metalness: .75, roughness: .3, envMapIntensity: 1.2 }),
+  bronze:   new THREE.MeshStandardMaterial({ color: '#6b4a2a', metalness: .6, roughness: .45 }),
+  lacquerTable: new THREE.MeshStandardMaterial({ color: '#4a0e0e', roughness: .35, envMapIntensity: .6 }),
+};
+
+/* ---------- 牌位貼圖（正面神位、背面生平、在世者卡片） ---------- */
+const TEX_W = 320, TEX_H = 768;
+const vert = s => s.replace(/（|\(/g, '︵').replace(/）|\)/g, '︶').replace(/—|-/g, '︱');
+const GOLD_TXT = '#e8c66a';
+function newCanvas() { const c = document.createElement('canvas'); c.width = TEX_W; c.height = TEX_H; return [c, c.getContext('2d')]; }
+function toTex(c) {
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = renderer.capabilities.getMaxAnisotropy();
+  return t;
+}
+function paintLacquer(g, base, frame = '#d4a843') {
+  const grd = g.createLinearGradient(0, 0, TEX_W, TEX_H);
+  grd.addColorStop(0, base[0]); grd.addColorStop(1, base[1]);
+  g.fillStyle = grd; g.fillRect(0, 0, TEX_W, TEX_H);
+  const sh = g.createLinearGradient(0, 0, TEX_W, 0);
+  sh.addColorStop(0, 'rgba(255,255,255,0)'); sh.addColorStop(.32, 'rgba(255,225,180,.10)'); sh.addColorStop(.55, 'rgba(255,255,255,0)');
+  g.fillStyle = sh; g.fillRect(0, 0, TEX_W, TEX_H);
+  g.strokeStyle = frame; g.lineWidth = 9; g.strokeRect(14, 14, TEX_W - 28, TEX_H - 28);
+  g.lineWidth = 2; g.strokeRect(32, 32, TEX_W - 64, TEX_H - 64);
+  g.fillStyle = frame;
+  [[32, 32], [TEX_W - 32, 32], [32, TEX_H - 32], [TEX_W - 32, TEX_H - 32]].forEach(([x, y]) => {
+    g.save(); g.translate(x, y); g.rotate(Math.PI / 4); g.fillRect(-7, -7, 14, 14); g.restore();
+  });
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+}
+function topOrnament(g, color) {
+  g.fillStyle = color;
+  g.save(); g.translate(TEX_W / 2, 66); g.rotate(Math.PI / 4); g.fillRect(-8, -8, 16, 16); g.restore();
+  g.fillRect(70, 65, 70, 2); g.fillRect(TEX_W - 140, 65, 70, 2);
+}
+/* 神位文字切段：「諱」後到「之神位」為名諱、「曾門X氏」的 X氏 放大 */
+function splitTablet(t) {
+  let i = t.indexOf('諱');
+  if (i >= 0) {
+    const rest = t.slice(i + 1), m = rest.match(/(府君)?之神位$/);
+    const big = m ? rest.slice(0, m.index) : rest;
+    return [[t.slice(0, i + 1), false], [big, true], [rest.slice(big.length), false]];
+  }
+  const m = t.match(/曾門(.{1,2}氏)/);
+  if (m) { const a = m.index + 2; return [[t.slice(0, a), false], [m[1], true], [t.slice(a + m[1].length), false]]; }
+  return [[t, false]];
+}
+function nameGradient(g, top, bottom) {
+  const ng = g.createLinearGradient(0, top, 0, bottom);
+  ng.addColorStop(0, '#fbe7a6'); ng.addColorStop(.5, '#e0b24e'); ng.addColorStop(1, '#f6d98a');
+  return ng;
+}
+function makeTabletTexture(p) {
+  const [c, g] = newCanvas();
+  paintLacquer(g, p.empty ? ['#4a3a30', '#2e241e'] : p.role === 'spouse' ? ['#7e3022', '#561a12'] : ['#701414', '#3e0808']);
+  topOrnament(g, '#d4a843');
+  const top = 96, bottom = p.lines ? 596 : 700;
+  if (p.empty) {
+    const chars = [...p.name], size = 92, step = 104, y0 = (top + bottom) / 2 - step * (chars.length - 1) / 2;
+    g.font = `900 ${size}px ${FONT}`; g.fillStyle = 'rgba(220,200,160,.55)';
+    chars.forEach((ch, i) => g.fillText(ch, TEX_W / 2, y0 + i * step));
+  } else {
+    // 神位文字直書，名諱放大
+    const segs = splitTablet(p.tabletText).map(([t, big]) => [[...vert(t)], big]).filter(s => s[0].length);
+    const S0 = 40, B0 = 100, gs = 1.07, gb = 1.03;
+    const total = segs.reduce((s, [ch, big]) => s + ch.length * (big ? B0 * gb : S0 * gs), 0);
+    const k = Math.min(1.12, (bottom - top) / total);
+    const S = S0 * k, B = Math.min(B0 * k, 108);
+    const used = segs.reduce((s, [ch, big]) => s + ch.length * (big ? B * gb : S * gs), 0);
+    let y = (top + bottom) / 2 - used / 2;
+    const ng = nameGradient(g, top, bottom);
+    g.shadowColor = 'rgba(0,0,0,.55)'; g.shadowBlur = 6; g.shadowOffsetY = 3;
+    segs.forEach(([chars, big]) => {
+      const sz = big ? B : S, st = sz * (big ? gb : gs);
+      g.font = `900 ${sz}px ${FONT}`; g.fillStyle = big ? ng : GOLD_TXT;
+      chars.forEach(ch => { g.fillText(ch, TEX_W / 2, y + st / 2); y += st; });
+    });
+    g.shadowColor = 'transparent';
+  }
+  if (p.tag) {   // 右欄標記（來台祖）
+    const tc = [...p.tag], fs = 26, bx = TEX_W - 70, by = 104, bh = tc.length * (fs + 6) + 14;
+    g.fillStyle = '#d4a843'; g.fillRect(bx, by, 34, bh);
+    g.fillStyle = '#5a0d0d'; g.font = `900 ${fs}px ${FONT}`;
+    tc.forEach((ch, i) => g.fillText(ch, bx + 17, by + 7 + fs / 2 + i * (fs + 6)));
+  }
+  if (p.lines) {
+    g.fillStyle = GOLD_TXT; g.fillRect(74, 620, TEX_W - 148, 1.5);
+    g.font = `700 ${p.lines.some(l => l.length > 13) ? 20 : 25}px ${FONT}`;
+    p.lines.forEach((l, i) => g.fillText(l, TEX_W / 2, (p.lines.length > 1 ? 652 : 668) + i * 36));
+  }
+  return toTex(c);
+}
+/* 直書段落：由右至左分欄 */
+function drawVerticalText(g, text, x0, x1, top, bottom, color, maxFs = 28, minFs = 17) {
+  const paras = text.replace(/\r/g, '').split('\n').map(s => s.trim()).filter(Boolean).map(s => [...vert(s)]);
+  let fs = maxFs, cols;
+  const layout = f => {
+    const per = Math.floor((bottom - top) / (f * 1.1)), out = [];
+    paras.forEach(chs => { for (let i = 0; i < chs.length; i += per) out.push(chs.slice(i, i + per)); });
+    return out;
+  };
+  while (true) {
+    cols = layout(fs);
+    if (cols.length <= Math.floor((x1 - x0) / (fs * 1.38)) + 1 || fs <= minFs) break;
+    fs -= 1;
+  }
+  const maxCols = Math.floor((x1 - x0) / (fs * 1.38)) + 1;
+  if (cols.length > maxCols) { cols = cols.slice(0, maxCols); const l = cols[maxCols - 1]; l[l.length - 1] = '…'; }
+  g.fillStyle = color; g.font = `700 ${fs}px ${FONT}`;
+  cols.forEach((col, ci) => col.forEach((ch, i) => g.fillText(ch, x1 - ci * fs * 1.38, top + fs * .55 + i * fs * 1.1)));
+}
+function makeBackTexture(p) {
+  const [c, g] = newCanvas();
+  const draw = img => {
+    paintLacquer(g, ['#3c0d0d', '#200505']);
+    g.fillStyle = GOLD_TXT; g.font = `900 34px ${FONT}`; g.fillText('生　平', TEX_W / 2, 78);
+    g.fillRect(74, 108, TEX_W - 148, 2);
+    let top = 134;
+    if (img) {   // 照片（裁成直式）
+      const w = 190, h = 230, x = (TEX_W - w) / 2, y = 128;
+      const r = Math.max(w / img.width, h / img.height), sw = w / r, sh = h / r;
+      g.save(); g.beginPath(); g.rect(x, y, w, h); g.clip();
+      g.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, x, y, w, h); g.restore();
+      g.strokeStyle = '#d4a843'; g.lineWidth = 4; g.strokeRect(x, y, w, h);
+      top = y + h + 26;
+    }
+    const bottom = p.alias ? 668 : 712;
+    if (p.bio) drawVerticalText(g, p.bio, 52, TEX_W - 58, top, bottom, '#f1dfae');
+    else {
+      g.fillStyle = 'rgba(232,198,106,.45)'; g.font = `900 46px ${FONT}`;
+      const ch = [...'生平待補'], st = 56, y0 = (top + bottom) / 2 - st * 1.5 - 20;
+      ch.forEach((t, i) => g.fillText(t, TEX_W / 2, y0 + i * st));
+      g.font = `400 17px ${FONT}`; g.fillStyle = 'rgba(232,198,106,.6)';
+      g.fillText('於紀念堂「祖先名冊」填寫', TEX_W / 2, bottom - 8);
+    }
+    if (p.alias) { g.fillStyle = GOLD_TXT; g.font = `700 22px ${FONT}`; g.fillText('字號　' + p.alias, TEX_W / 2, 700); }
+  };
+  draw(null);
+  const t = toTex(c);
+  if (p.avatar) {
+    const img = new Image();
+    img.onload = () => { draw(img); t.needsUpdate = true; };
+    img.src = p.avatar;
+  }
+  return t;
+}
+function makeLivingTexture(p) {
+  const c = document.createElement('canvas'); c.width = 320; c.height = 560;
+  const g = c.getContext('2d'), W = 320, H = 560;
+  const grd = g.createLinearGradient(0, 0, W, H); grd.addColorStop(0, '#fbf4e2'); grd.addColorStop(1, '#ecdcb6');
+  g.fillStyle = grd; g.fillRect(0, 0, W, H);
+  g.strokeStyle = '#a82020'; g.lineWidth = 6; g.strokeRect(12, 12, W - 24, H - 24);
+  g.lineWidth = 1.5; g.strokeRect(26, 26, W - 52, H - 52);
+  g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.fillStyle = '#a82020'; g.font = `700 28px ${FONT}`;
+  g.fillText(p.role === 'main' ? `第 ${CN[p.gen]} 世` : '配 偶', W / 2, 64);
+  g.fillRect(80, 92, W - 160, 1.5);
+  const chars = [...vert(p.name)], top = 116, bottom = 452;
+  const size = Math.min(92, (bottom - top) / chars.length * .9), step = Math.min(size * 1.1, (bottom - top) / chars.length);
+  const y0 = (top + bottom) / 2 - step * (chars.length - 1) / 2;
+  g.fillStyle = '#1a0f00'; g.font = `900 ${size}px ${FONT}`;
+  chars.forEach((ch, i) => g.fillText(ch, W / 2, y0 + i * step));
+  g.fillStyle = '#7a5a2a'; g.font = `700 22px ${FONT}`;
+  (p.lines || ['在世']).forEach((l, i, a) => g.fillText(l, W / 2, (a.length > 1 ? 482 : 496) + i * 30));
+  return toTex(c);
+}
+
+/* ---------- 牌位模型 ---------- */
+const BODY_H = 2.64;
+const archShape = new THREE.Shape();
+archShape.moveTo(0.62, 0); archShape.absarc(0, 0, 0.62, 0, Math.PI, false); archShape.lineTo(0.62, 0);
+const archGeo = new THREE.ExtrudeGeometry(archShape, { depth: .2, bevelEnabled: true, bevelThickness: .02, bevelSize: .02, bevelSegments: 2, curveSegments: 28 });
+archGeo.translate(0, 0, -.1);
+const archInnerShape = new THREE.Shape();
+archInnerShape.moveTo(0.46, 0); archInnerShape.absarc(0, 0, 0.46, 0, Math.PI, false); archInnerShape.lineTo(0.46, 0);
+const archInnerGeo = new THREE.ShapeGeometry(archInnerShape, 24);
+const bodyGeo = new THREE.BoxGeometry(TW, BODY_H, .16);
+const ped1 = new THREE.BoxGeometry(1.45, .22, .5), ped2 = new THREE.BoxGeometry(1.25, .14, .4);
+const finialGeo = new THREE.SphereGeometry(.075, 16, 12);
+const LIVE_H = 1.95, liveGeo = new THREE.BoxGeometry(TW, LIVE_H, .05);
+
+const pickables = [];
+const tablets = {};
+function buildTablet(p) {
+  if (p.alive) return buildLivingCard(p);
+  const grp = new THREE.Group();
+  const side = new THREE.MeshStandardMaterial({ color: p.empty ? '#3a2e26' : p.role === 'spouse' ? '#5e1c14' : '#4e0c0c', roughness: .35, envMapIntensity: .6 });
+  const front = new THREE.MeshStandardMaterial({ map: makeTabletTexture(p), roughness: .4, envMapIntensity: .5,
+    emissive: new THREE.Color('#ffb84a'), emissiveIntensity: 0 });
+  front.emissiveMap = front.map;
+  const back = p.empty ? side : new THREE.MeshStandardMaterial({ map: makeBackTexture(p), roughness: .45, envMapIntensity: .4 });
+  const mats = [side, side, side, side, front, back];
+  if (p.empty) mats.forEach(m => { m.transparent = true; m.opacity = .38; m.depthWrite = false; });
+  const body = new THREE.Mesh(bodyGeo, mats);
+  body.userData.pid = p.id; pickables.push(body); grp.add(body);
+
+  const goldM = p.empty ? M.gold.clone() : M.gold;
+  const woodM = p.empty ? M.woodDark.clone() : M.woodDark;
+  if (p.empty) [goldM, woodM].forEach(m => { m.transparent = true; m.opacity = .35; m.depthWrite = false; });
+  const arch = new THREE.Mesh(archGeo, goldM); arch.position.y = BODY_H / 2; arch.scale.y = .6; grp.add(arch);
+  [.125, -.125].forEach(z => {
+    const inner = new THREE.Mesh(archInnerGeo, side); inner.position.set(0, BODY_H / 2 + .02, z); inner.scale.y = .55;
+    if (z < 0) inner.rotation.y = Math.PI; grp.add(inner);
+  });
+  const fin = new THREE.Mesh(finialGeo, goldM); fin.position.y = BODY_H / 2 + .62 * .6 + .06; grp.add(fin);
+  const b1 = new THREE.Mesh(ped1, woodM); b1.position.y = -BODY_H / 2 - .18; grp.add(b1);
+  const b2 = new THREE.Mesh(ped2, goldM); b2.position.y = -BODY_H / 2 - .02; grp.add(b2);
+
+  grp.position.set(p.x, p.y, 0);
+  scene.add(grp);
+  tablets[p.id] = { grp, front, flip: 0 };
+}
+/* 在世者：不立牌位，做成懸掛在世系線下的宣紙卡 */
+const cordM = new THREE.MeshStandardMaterial({ color: '#a82020', roughness: .6 });
+function buildLivingCard(p) {
+  const grp = new THREE.Group();
+  const wood = new THREE.MeshStandardMaterial({ color: '#8a6a3e', roughness: .6 });
+  const front = new THREE.MeshStandardMaterial({ map: makeLivingTexture(p), roughness: .8,
+    emissive: new THREE.Color('#ffcf7a'), emissiveIntensity: 0 });
+  front.emissiveMap = front.map;
+  const paper = new THREE.MeshStandardMaterial({ color: '#efe3c4', roughness: .9 });
+  const card = new THREE.Mesh(liveGeo, [wood, wood, wood, wood, front, paper]);
+  card.userData.pid = p.id; pickables.push(card); grp.add(card);
+  const cordLen = .45;
+  if (p.role === 'main') {   // 配偶卡不掛繩，與主脈卡同高並排
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, cordLen, 6), cordM);
+    cord.position.y = LIVE_H / 2 + cordLen / 2; grp.add(cord);
+    const knotR = new THREE.Mesh(new THREE.TorusGeometry(.07, .022, 8, 16), cordM);
+    knotR.position.y = LIVE_H / 2 + .1; grp.add(knotR);
+  }
+  // 卡片頂端 + 繩長 = 世系線終點
+  grp.position.set(p.x, p.y + TOP_OFF - cordLen - LIVE_H / 2, 0);
+  scene.add(grp);
+  tablets[p.id] = { grp, front, flip: 0, sway: Math.random() * 6 };
+}
+
+/* ---------- 金色世系連線 ---------- */
+const rodGeo = new THREE.CylinderGeometry(1, 1, 1, 10);
+const knotGeo = new THREE.OctahedronGeometry(.11);
+function rod(a, b, r = .035) {
+  const d = new THREE.Vector3().subVectors(b, a), len = d.length();
+  const m = new THREE.Mesh(rodGeo, M.gold);
+  m.scale.set(r, len, r);
+  m.position.copy(a).addScaledVector(d, .5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+  scene.add(m);
+}
+function knot(v, s = 1) { const k = new THREE.Mesh(knotGeo, M.gold); k.position.copy(v); k.scale.setScalar(s); scene.add(k); }
+const V = (x, y, z = 0) => new THREE.Vector3(x, y, z);
+const TOP_OFF = BODY_H / 2 + .62 * .6 + .14, BOT_OFF = BODY_H / 2 + .3;
+function buildLines() {
+  mains.forEach(p => {
+    const coupleY = p.alive ? p.y + .5 : p.y - .55;
+    if (p.spouse) {   // 夫妻連結
+      const y = coupleY;
+      rod(V(p.x + TW / 2, y, -.02), V(p.spouse.x - TW / 2, y, -.02), .028);
+      knot(V(p.cx, y, -.02), .9);
+    }
+    if (!p.children.length) return;
+    const sy = p.alive ? p.y + TOP_OFF - .45 - LIVE_H : p.y - BOT_OFF, ty = p.y - GEN_H + TOP_OFF, my = (p.y - BOT_OFF + ty) / 2;
+    rod(V(p.cx, p.spouse ? coupleY : sy), V(p.cx, my));
+    const xs = p.children.map(c => c.x);
+    const minX = Math.min(p.cx, ...xs), maxX = Math.max(p.cx, ...xs);
+    if (maxX - minX > .01) rod(V(minX, my), V(maxX, my));
+    knot(V(p.cx, my), 1.1);
+    p.children.forEach(c => { rod(V(c.x, my), V(c.x, ty)); if (Math.abs(c.x - p.cx) > .01) knot(V(c.x, my)); });
+  });
+}
+
+/* ---------- 供桌、香爐、香煙 ---------- */
+function softTex(inner, outer) {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'), r = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  r.addColorStop(0, inner); r.addColorStop(1, outer);
+  g.fillStyle = r; g.fillRect(0, 0, 64, 64);
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+const smoke = [];
+let altarTip = V(0, 0, 0), altarTipBase = V(0, 0, 0);
+function buildAltar() {
+  const ax = root.x, ay = root.y - BOT_OFF - .05, az = 1.0;
+  const top = new THREE.Mesh(new THREE.BoxGeometry(1.8, .1, .8), M.lacquerTable); top.position.set(ax, ay, az); scene.add(top);
+  const legG = new THREE.BoxGeometry(.08, .6, .08);
+  [[-.82, -.33], [.82, -.33], [-.82, .33], [.82, .33]].forEach(([dx, dz]) => {
+    const l = new THREE.Mesh(legG, M.lacquerTable); l.position.set(ax + dx, ay - .35, az + dz); scene.add(l);
+  });
+  const pot = new THREE.Mesh(new THREE.CylinderGeometry(.24, .18, .26, 24), M.bronze); pot.position.set(ax, ay + .18, az); scene.add(pot);
+  pot.userData.action = 'incense-all'; pickables.push(pot);
+  altarTipBase = V(ax, ay + .25, az);
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(.24, .025, 8, 24), M.gold); rim.rotation.x = Math.PI / 2; rim.position.set(ax, ay + .31, az); scene.add(rim);
+  const stickG = new THREE.CylinderGeometry(.008, .008, .5, 6), stickM = new THREE.MeshStandardMaterial({ color: '#a8321e' });
+  const tipM = new THREE.MeshBasicMaterial({ color: '#ff8a3a' });
+  [-.06, 0, .06].forEach((dx, i) => {
+    const s = new THREE.Mesh(stickG, stickM); s.position.set(ax + dx, ay + .5, az); s.rotation.z = (i - 1) * .12; scene.add(s);
+    const tip = new THREE.Mesh(new THREE.SphereGeometry(.014, 6, 6), tipM);
+    tip.position.set(ax + dx - Math.sin((i - 1) * .12) * .25, ay + .75, az); scene.add(tip);
+  });
+  altarTip = V(ax, ay + .77, az);
+  addSmoke(altarTip, 26);
+}
+
+/* ================= 祠堂陳設：匾額、對聯、沿革碑、字輩柱、塔位側殿 =================
+   HALL 可自行修改；對聯為暫擬，請換成族中慣用的楹聯。 */
+const HALL = {
+  plaque: '三省堂',
+  plaqueSub: '龍山派曾氏',
+  couplet: ['三省修身承祖德', '一心耕讀啟後昆'],   // [上聯(右), 下聯(左)]
+  zibei: '奎壁呈雲瑞人文煥國華台衡思繼武鼎甲勵承家一貫書紳永千秋錫福遐貽謀資燕翼世業仰清嘉',
+  zibeiStartWorld: 66,   // 「奎」為大宗第六十六世
+  zibeiLocalGen: 2,      // 本支第二世曾奎德＝「奎」字輩
+};
+const cnNum = n => {
+  const d = ['零','一','二','三','四','五','六','七','八','九'];
+  if (n < 10) return d[n];
+  if (n < 20) return '十' + (n % 10 ? d[n % 10] : '');
+  if (n < 100) return d[Math.floor(n / 10)] + '十' + (n % 10 ? d[n % 10] : '');
+  return String(n);
+};
+const zibeiOf = gen => {
+  const i = gen - HALL.zibeiLocalGen;
+  return { ch: i >= 0 && i < HALL.zibei.length ? HALL.zibei[i] : '', world: HALL.zibeiStartWorld + i };
+};
+const HISTORY_DEFAULT = `曾氏家族沿革
+
+一、姓氏由來與上古淵源
+
+曾氏家族擁有上下銜接四、五千年的悠久源流，其祖脈可追溯至遠古時代。上古祖神神農氏教民耕種、製藥醫病；黃帝（公孫名軒轅）建都有熊，為天下共主；其後仁慈智慧的堯帝、以孝聞名的舜帝，以及治水有功的禹，皆為曾氏先祖。
+
+禹的第五世孫少康中興夏朝後，將最小的兒子曲烈封於「鄫」地（今山東省嶧縣），建立鄫國。春秋時代，鄫國被莒國所併，鄫國太子巫懷著亡國之痛奔往魯國，為紀念故國，決定去「邑」旁為「曾」，以「曾」為姓，此即曾姓之始。
+
+二、血脈淵源與宗聖精神
+
+曾氏後人奉孔子弟子曾子（曾參）為宗聖始祖，以「三省堂」、「武城堂」為堂號，傳承「忠恕」家風，代代不輟。
+
+歷史上曾有「曾、邱二姓聯宗」的佳話。原由福建省海澄縣新安鄉邱姓女子與曾氏子弟結緣，導致新安鄉、厚境、清漳等地的邱、曾兩姓實際上同宗一脈，使用相同的輩序昭穆，彼此間不通婚姻。
+
+三、渡台開墾史（新港開基支脈）
+
+明崇禎十五年（1642年），原籍福建省澄邑的曾振賜公渡海來台，開基於台南，為曾氏入台之始。
+
+康熙末年（約1720年），始祖兄弟五人——連公、旺公、龍公、虎公、耄公，原籍福建泉州府同安縣，由連公率領航海東渡來台，落腳雲林口湖一帶，勤耕務農，篳路藍縷，開創基業。
+
+清道光二十五年（1845年），農曆六月初八，雲嘉沿海發生大海嘯（即「萬善同歸」之由來），曾氏族人家屋被大水沖失，死傷慘重。其中曾武六公一家二十七人，竟有二十人罹難，令人哀慟。
+
+咸豐至光緒年間，曾氏族人於新港（今雲林金湖）一帶與吳姓、林姓等發生多次莊頭衝突，並曾遭受中法戰爭時期法國侵台的波及，族人避難保衛家園，歷盡艱辛，展現出極強的凝聚力。
+
+四、龍山派字輩（昭穆）
+
+龍山派為曾氏南遷後極重要的一支，源於福建省泉州府龍山地區（今晉江一帶），字輩詩意優美，強調人文薈萃與家族傳承：
+
+奎壁呈雲瑞，人文煥國華，台衡思繼武，鼎甲勵承家，
+一貫書紳永，千秋錫福遐，貽謀資燕翼，世業仰清嘉。
+
+（自第六十六世「奎」字輩起排列，象徵文運亨通、家族棟樑、繼承先志、庇蔭後代。）
+
+五、精神傳承
+
+無論身處何地，曾氏子孫皆以「宗聖曾子弟子」自居，重視「忠恕」家風，以曾子「吾日三省吾身」之精神，勉勵後代修身齊家，承先啟後，永傳家聲。`;
+const historyText = () => (MEM && MEM.familyHistory) || HISTORY_DEFAULT;
+
+function boardTexture(w, h, paint) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); g.textAlign = 'center'; g.textBaseline = 'middle';
+  paint(g, w, h); return toTex(c);
+}
+function addBoard(geo, frontTex, sideColor, pos, action) {
+  const side = new THREE.MeshStandardMaterial({ color: sideColor, roughness: .45, envMapIntensity: .5 });
+  const front = new THREE.MeshStandardMaterial({ map: frontTex, roughness: .45, envMapIntensity: .5, emissive: new THREE.Color('#ffb84a'), emissiveIntensity: 0 });
+  front.emissiveMap = front.map;
+  const m = new THREE.Mesh(geo, [side, side, side, side, front, side]);
+  m.position.copy(pos); scene.add(m);
+  if (action) { m.userData.action = action; m.userData.front = front; pickables.push(m); }
+  return m;
+}
+let hallExt = { minX: 0, maxX: 0 }, plaquePos, stelePos, pillarX, towerHall = null;
+
+function buildHall() {
+  const rx = root.x, ry = root.y;
+  // 匾額（由右至左橫書）
+  plaquePos = V(rx, ry + TOP_OFF + 1.05, -.05);
+  const ptex = boardTexture(1024, 320, (g, W, H) => {
+    const gr = g.createLinearGradient(0, 0, 0, H); gr.addColorStop(0, '#241008'); gr.addColorStop(1, '#0e0603');
+    g.fillStyle = gr; g.fillRect(0, 0, W, H);
+    g.strokeStyle = '#d4a843'; g.lineWidth = 16; g.strokeRect(10, 10, W - 20, H - 20);
+    g.lineWidth = 3; g.strokeRect(36, 36, W - 72, H - 72);
+    const chars = [...HALL.plaque].reverse(), step = (W - 260) / chars.length;
+    const ng = nameGradient(g, 80, 240);
+    g.font = `900 170px ${FONT}`; g.fillStyle = ng; g.shadowColor = 'rgba(0,0,0,.6)'; g.shadowBlur = 8; g.shadowOffsetY = 4;
+    chars.forEach((ch, i) => g.fillText(ch, 130 + step * (i + .5), H / 2 + 8));
+    g.shadowColor = 'transparent';
+    g.font = `700 30px ${FONT}`; g.fillStyle = '#e8c66a';
+    [...HALL.plaqueSub].forEach((ch, i) => g.fillText(ch, W - 78, 80 + i * 34));
+    g.fillStyle = '#a82020'; g.fillRect(52, H - 116, 56, 56);
+    g.fillStyle = '#f6d98a'; g.font = `900 22px ${FONT}`; g.fillText('曾', 80, H - 99); g.fillText('氏', 80, H - 75);
+  });
+  addBoard(new THREE.BoxGeometry(3.6, 1.12, .14), ptex, '#1a0a05', plaquePos, 'plaque');
+  [-1.85, 1.85].forEach(dx => { const k = new THREE.Mesh(knotGeo, M.gold); k.position.set(rx + dx, plaquePos.y, .05); k.scale.setScalar(1.3); scene.add(k); });
+
+  // 對聯（右上聯、左下聯）
+  HALL.couplet.forEach((text, i) => {
+    const tex = boardTexture(200, 1200, (g, W, H) => {
+      const gr = g.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, '#8c1414'); gr.addColorStop(.5, '#b22222'); gr.addColorStop(1, '#8c1414');
+      g.fillStyle = gr; g.fillRect(0, 0, W, H);
+      g.strokeStyle = '#d4a843'; g.lineWidth = 8; g.strokeRect(10, 10, W - 20, H - 20);
+      const ch = [...text], step = (H - 120) / ch.length;
+      g.font = `900 ${Math.min(130, step * .86)}px ${FONT}`; g.fillStyle = '#f6d98a';
+      g.shadowColor = 'rgba(0,0,0,.45)'; g.shadowBlur = 5; g.shadowOffsetY = 3;
+      ch.forEach((c, k) => g.fillText(c, W / 2, 60 + step * (k + .5)));
+    });
+    addBoard(new THREE.BoxGeometry(.5, 3.1, .08), tex, '#5a0c0c', V(rx + (i === 0 ? 1.75 : -1.75), ry + .15, -.08), 'plaque');
+  });
+
+  // 字輩牌：掛在每一世最右側，標出字輩與大宗世數
+  computeBounds();
+  let zMax = -Infinity;
+  for (let gen = 1; gen <= MAX_GEN; gen++) {
+    const z = zibeiOf(gen); if (!z.ch) continue;
+    const row = PEOPLE.filter(p => p.gen === gen), y = row[0].y;
+    const x = Math.max(...row.map(p => p.x)) + TW / 2 + .62;
+    zMax = Math.max(zMax, x);
+    const tex = boardTexture(200, 440, (g, W, H) => {
+      g.fillStyle = '#f3e3b8'; g.fillRect(0, 0, W, H);
+      g.strokeStyle = '#a82020'; g.lineWidth = 8; g.strokeRect(8, 8, W - 16, H - 16);
+      g.fillStyle = '#7a5a2a'; g.font = `700 24px ${FONT}`; g.fillText('字 輩', W / 2, 44);
+      g.fillStyle = '#a82020'; g.font = `900 120px ${FONT}`; g.fillText(z.ch, W / 2, 140);
+      g.fillStyle = '#5a3a10'; g.font = `700 26px ${FONT}`;
+      const t = [...`第${cnNum(z.world)}世`]; t.forEach((c, i) => g.fillText(c, W / 2, 232 + i * Math.min(34, 180 / t.length)));
+    });
+    addBoard(new THREE.BoxGeometry(.42, .92, .05), tex, '#8a6a3e', V(x, y + .55, -.05), 'zibei:' + gen);
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(.01, .01, .5, 6), cordM); cord.position.set(x, y + 1.26, -.05); scene.add(cord);
+    const kn = new THREE.Mesh(new THREE.TorusGeometry(.05, .016, 8, 14), cordM); kn.position.set(x, y + 1.5, -.05); scene.add(kn);
+  }
+  pillarX = isFinite(zMax) ? zMax : bounds.maxX;
+
+  // 沿革碑
+  stelePos = V(rx - 3.5, ry - GEN_H * .62, -.4);
+  const heads = historyText().split('\n').map(s => s.trim()).filter(s => /^[一二三四五六七八九十]+、/.test(s)).map(s => s.replace(/^[一二三四五六七八九十]+、/, '').replace(/（.*?）/g, ''));
+  const stex = boardTexture(400, 900, (g, W, H) => {
+    g.fillStyle = '#6f6a62'; g.fillRect(0, 0, W, H);
+    for (let i = 0; i < 2500; i++) { g.fillStyle = `rgba(${Math.random() < .5 ? '255,255,255' : '0,0,0'},${Math.random() * .07})`; g.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+    g.strokeStyle = 'rgba(30,25,20,.6)'; g.lineWidth = 4; g.strokeRect(24, 24, W - 48, H - 48);
+    g.fillStyle = '#2a241e'; g.font = `900 56px ${FONT}`;
+    [...'曾氏沿革'].forEach((c, i) => g.fillText(c, W - 80, 110 + i * 70));
+    g.font = `700 26px ${FONT}`; g.fillStyle = '#e8c66a';
+    heads.slice(0, 6).forEach((h, k) => [...vert(h)].slice(0, 14).forEach((c, i) => g.fillText(c, W - 160 - k * 44, 110 + i * 34)));
+    g.fillStyle = 'rgba(30,25,20,.75)'; g.font = `700 22px ${FONT}`; g.fillText('輕觸展讀', W / 2, H - 60);
+  });
+  addBoard(new THREE.BoxGeometry(1.5, 3.4, .32), stex, '#5c5852', stelePos, 'history');
+  const stoneM = new THREE.MeshStandardMaterial({ color: '#57534d', roughness: .9 });
+  const cap = new THREE.Mesh(new THREE.BoxGeometry(1.8, .3, .5), stoneM); cap.position.set(stelePos.x, stelePos.y + 1.85, stelePos.z); scene.add(cap);
+  const base = new THREE.Mesh(new THREE.BoxGeometry(2, .45, .9), stoneM); base.position.set(stelePos.x, stelePos.y - 1.92, stelePos.z); scene.add(base);
+
+  hallExt = { minX: stelePos.x - 1.1, maxX: pillarX + .4 };
+  buildTowerHall();
+}
+
+/* 塔位側殿：只有紀念堂登記過塔位才建立 */
+const TOWERS = {
+  A: { name: 'A｜口湖鄉公所靈骨塔', floors: 3 },
+  B_new: { name: 'B｜蚵寮新塔', floors: 3 },
+  B_old: { name: 'B｜蚵寮舊塔', floors: 5 },
+};
+const SLOTS = 12;
+function placementOf(p) {
+  if (!MEM || !MEM.placements) return null;
+  const main = p.role === 'main' ? p : byId[p.spouseOf];
+  if (!main.mid) return null;
+  const pl = MEM.placements[p.role === 'main' ? main.mid : main.mid + '_spouse'];
+  return pl && pl.tower && TOWERS[pl.tower] ? pl : null;
+}
+function slotLabel(tower, floor, slot) {
+  const c = MEM && MEM.slotNumbers && MEM.slotNumbers[tower + '_' + floor];
+  return (c && c[slot]) || String(slot + 1);
+}
+function buildTowerHall() {
+  const occ = {};
+  PEOPLE.forEach(p => { const pl = placementOf(p); if (pl) (occ[pl.tower] = occ[pl.tower] || []).push([p, pl]); });
+  const used = Object.keys(TOWERS).filter(k => occ[k]);
+  if (!used.length) return;
+  const hx = Math.max(pillarX, bounds.maxX) + 9, W = 5.2;
+  let y = 0;
+  towerHall = { x: hx, panels: {}, top: 0, bottom: 0 };
+  const titleTex = boardTexture(1024, 200, (g, Wc, Hc) => {
+    g.fillStyle = '#1a0a05'; g.fillRect(0, 0, Wc, Hc); g.strokeStyle = '#d4a843'; g.lineWidth = 10; g.strokeRect(8, 8, Wc - 16, Hc - 16);
+    g.fillStyle = '#e8c66a'; g.font = `900 96px ${FONT}`; g.fillText('塔 位 側 殿', Wc / 2, Hc / 2 + 6);
+  });
+  addBoard(new THREE.BoxGeometry(W, 1, .1), titleTex, '#1a0a05', V(hx, y + 1.2, 0));
+  used.forEach(k => {
+    const T = TOWERS[k], rows = T.floors, H = .8 + rows * .62;
+    const draw = hiKey => boardTexture(1040, Math.round(1040 * H / W), (g, Wc, Hc) => {
+      g.fillStyle = '#efe3c4'; g.fillRect(0, 0, Wc, Hc);
+      g.strokeStyle = '#7a5a2a'; g.lineWidth = 8; g.strokeRect(6, 6, Wc - 12, Hc - 12);
+      g.fillStyle = '#5a0d0d'; g.font = `900 46px ${FONT}`; g.fillText(T.name, Wc / 2, 62);
+      const top = 110, rh = (Hc - top - 20) / rows, cw = (Wc - 140) / SLOTS;
+      for (let f = rows - 1, r = 0; f >= 0; f--, r++) {
+        const yy = top + r * rh;
+        g.fillStyle = '#7a5a2a'; g.font = `700 26px ${FONT}`; g.fillText(['一','二','三','四','五'][f] + '樓', 60, yy + rh / 2);
+        for (let s = 0; s < SLOTS; s++) {
+          const x = 110 + s * cw, who = occ[k].find(([, pl]) => +pl.floor === f && +pl.slot === s);
+          const hi = who && hiKey === who[0].id;
+          g.fillStyle = who ? (hi ? '#d4a843' : '#8c1414') : '#d9cba6';
+          g.fillRect(x + 4, yy + 6, cw - 8, rh - 12);
+          g.fillStyle = who ? (hi ? '#3e0808' : '#f6d98a') : '#9a8a66';
+          if (who) {
+            const n = [...who[0].name.replace(/^曾/, '')].slice(0, 3), fs = Math.min(30, (rh - 40) / n.length);
+            g.font = `900 ${fs}px ${FONT}`; n.forEach((c, i) => g.fillText(c, x + cw / 2, yy + 22 + fs / 2 + i * fs));
+          } else { g.font = `400 18px ${FONT}`; g.fillText(slotLabel(k, f, s), x + cw / 2, yy + rh / 2); }
+        }
+      }
+    });
+    y -= H / 2 + .3;
+    const m = addBoard(new THREE.BoxGeometry(W, H, .08), draw(null), '#7a5a2a', V(hx, y, 0));
+    towerHall.panels[k] = { mesh: m, draw, y };
+    y -= H / 2;
+  });
+  towerHall.top = 1.8; towerHall.bottom = y;
+}
+function towerView(hiId) {
+  const pl = hiId && placementOf(byId[hiId]);
+  Object.entries(towerHall.panels).forEach(([k, pn]) => {
+    const old = pn.mesh.material[4].map;
+    pn.mesh.material[4].map = pn.mesh.material[4].emissiveMap = pn.draw(pl && pl.tower === k ? hiId : null);
+    pn.mesh.material[4].needsUpdate = true; old.dispose();
+  });
+  if (pl) {
+    const pn = towerHall.panels[pl.tower], d = Math.max(7, fitDist(6, 4));
+    return [V(towerHall.x + d * .08, pn.y + .2, d), V(towerHall.x, pn.y, 0)];
+  }
+  const h = towerHall.top - towerHall.bottom, cy = (towerHall.top + towerHall.bottom) / 2, d = fitDist(6.4, h * 1.15);
+  return [V(towerHall.x + d * .08, cy, d), V(towerHall.x, cy, 0)];
+}
+
+/* ================= 祭祀：忌日、上香、語音口述 =================
+   後端：arcar Worker /zupu 路由（worker/zupu-module.js）。
+   尚未部署時自動改為「本機模式」：上香只記在這台裝置，語音無法上傳。 */
+const RITE_API = 'https://arcar.kftseng2oo1.workers.dev/zupu';
+const FAMILY = 'longshan';
+const RITE = { online: false, state: { total: 0, days: {}, byPid: {}, recent: [], voices: {} } };
+const LOCAL_KEY = 'zupu_rite_local_v1';
+const twDay = (offset = 0) => {   // 台北日期（YYYY-MM-DD），以 UTC 正午的 Date 表示該日
+  const d = new Date(Date.now() + 8 * 3600e3 + offset * 86400e3);
+  const s = d.toISOString().slice(0, 10);
+  return { s, date: new Date(s + 'T12:00:00Z') };
+};
+async function riteFetch(path, opt = {}) {
+  const ctl = new AbortController(), t = setTimeout(() => ctl.abort(), opt.timeout || 8000);
+  try {
+    const r = await fetch(RITE_API + path + (path.includes('?') ? '&' : '?') + 'f=' + FAMILY, { ...opt, signal: ctl.signal });
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    return await r.json();
+  } finally { clearTimeout(t); }
+}
+async function loadRite() {
+  try {
+    const st = await riteFetch('/state', { timeout: 6000 });
+    if (st && st.ok) { RITE.state = { ...RITE.state, ...st.state }; RITE.online = true; return; }
+  } catch (e) {}
+  try { const l = JSON.parse(localStorage.getItem(LOCAL_KEY) || 'null'); if (l) RITE.state = { ...RITE.state, ...l }; } catch (e) {}
+}
+function saveLocal() { try { localStorage.setItem(LOCAL_KEY, JSON.stringify({ ...RITE.state, voices: {} })); } catch (e) {} }
+
+/* ---------- 忌日 ---------- */
+const lunarFmt = (() => { try { return new Intl.DateTimeFormat('zh-TW-u-ca-chinese', { month: 'numeric', day: 'numeric', timeZone: 'UTC' }); } catch (e) { return null; } })();
+function lunarMD(date) {
+  if (!lunarFmt) return null;
+  const parts = lunarFmt.formatToParts(date), m = (parts.find(x => x.type === 'month') || {}).value || '', d = (parts.find(x => x.type === 'day') || {}).value || '';
+  return { m: parseInt(m.replace(/\D/g, ''), 10), d: parseInt(d.replace(/\D/g, ''), 10), leap: /閏|bis/i.test(m) };
+}
+const CN_MON = ['', '正', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '臘'];
+const cnDay = d => d <= 10 ? '初' + cnNum(d).replace('一十', '十') : d < 20 ? '十' + cnNum(d - 10) : d === 20 ? '二十' : d < 30 ? '廿' + cnNum(d - 20) : '三十';
+function deathMD(p) {
+  const m = /(\d{4})\D(\d{1,2})\D(\d{1,2})/.exec(p.death || '');
+  return m ? { y: +m[1], m: +m[2], d: +m[3], lunar: !!p.deathLunar } : null;
+}
+function daysUntilAnniv(p) {
+  const md = deathMD(p); if (!md) return null;
+  for (let i = 0; i <= 400; i++) {
+    const { date } = twDay(i);
+    if (md.lunar) { const l = lunarMD(date); if (!l) return null; if (!l.leap && l.m === md.m && l.d === md.d) return i; }
+    else if (date.getUTCMonth() + 1 === md.m && date.getUTCDate() === md.d) return i;
+  }
+  return null;
+}
+function annivLabel(p) {
+  const md = deathMD(p); if (!md) return '';
+  return md.lunar ? `農曆${CN_MON[md.m]}月${cnDay(md.d)}` : `${md.m}月${md.d}日`;
+}
+let ANNIV = [];
+function computeAnniv() {
+  ANNIV = PEOPLE.filter(p => !p.alive && !p.empty && p.death).map(p => ({ p, days: daysUntilAnniv(p) }))
+    .filter(a => a.days !== null).sort((a, b) => a.days - b.days);
+  ANNIV.forEach(a => {
+    const t = tablets[a.p.id]; if (a.days !== 0 || !t) return;
+    t.memorial = true;
+    t.aura = new THREE.Sprite(new THREE.SpriteMaterial({ map: softTex('rgba(255,210,120,.9)', 'rgba(255,190,80,0)'), transparent: true, depthWrite: false }));
+    t.aura.scale.set(3.4, 5, 1); t.aura.position.set(a.p.x, a.p.y + .2, -.35); scene.add(t.aura);
+  });
+}
+function nextSolarDate(days) { const d = twDay(days).date; return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; }
+function showRiteBanner() {
+  const el = document.getElementById('riteBanner');
+  const today = ANNIV.filter(a => a.days === 0), soon = ANNIV.find(a => a.days > 0 && a.days <= 7);
+  if (today.length) {
+    el.innerHTML = `<b>今日是 ${today.map(a => escH(a.p.name)).join('、')} 忌日</b><span>${escH(annivLabel(today[0].p))}・輕觸前往上香</span>`;
+    el.onclick = () => selectPerson(today[0].p.id);
+  } else if (soon) {
+    el.innerHTML = `<b>${escH(soon.p.name)} 忌日將至</b><span>${escH(annivLabel(soon.p))}（${nextSolarDate(soon.days)}）・還有 ${soon.days} 天</span>`;
+    el.onclick = () => selectPerson(soon.p.id);
+  } else return;
+  el.classList.add('on');
+}
+
+/* ---------- 上香者稱呼 ---------- */
+function askText(title, placeholder, def = '') {
+  return new Promise(res => {
+    const el = document.getElementById('askBox');
+    el.querySelector('h4').textContent = title;
+    const inp = el.querySelector('input'); inp.placeholder = placeholder; inp.value = def;
+    el.classList.add('on'); setTimeout(() => inp.focus(), 50);
+    const done = v => { el.classList.remove('on'); el.querySelector('.ok').onclick = el.querySelector('.no').onclick = null; res(v); };
+    el.querySelector('.ok').onclick = () => done(inp.value.trim());
+    el.querySelector('.no').onclick = () => done(null);
+  });
+}
+async function getWho() {
+  let w = ''; try { w = localStorage.getItem('zupu_who') || ''; } catch (e) {}
+  if (w) return w;
+  w = await askText('請問您的稱呼？', '例：長孫 曾小明（會顯示在上香紀錄）');
+  if (w) { try { localStorage.setItem('zupu_who', w.slice(0, 20)); } catch (e) {} }
+  return w;
+}
+function toast(msg) {
+  const el = document.getElementById('toast'); el.textContent = msg; el.classList.add('on');
+  clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('on'), 2600);
+}
+
+/* ---------- 上香 ---------- */
+const emitters = [];   // { pos, sprites, until, rate }
+let smokeTex;
+function addSmoke(pos, n = 18, life = 0) {
+  smokeTex = smokeTex || softTex('rgba(150,145,138,.55)', 'rgba(150,145,138,0)');
+  const sprites = [];
+  for (let i = 0; i < n; i++) {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({ map: smokeTex, transparent: true, depthWrite: false, opacity: 0 }));
+    sp.userData.t = i / n; scene.add(sp); sprites.push(sp);
+  }
+  const e = { pos: pos.clone(), sprites, until: life ? performance.now() + life : 0, born: performance.now() };
+  emitters.push(e); return e;
+}
+const stickGeo = new THREE.CylinderGeometry(.008, .008, .5, 6), stickMat = new THREE.MeshStandardMaterial({ color: '#a8321e' });
+const tipMat = new THREE.MeshBasicMaterial({ color: '#ff8a3a' });
+function plantIncense(x, y, z, life) {
+  const g = new THREE.Group();
+  [-.05, 0, .05].forEach((dx, i) => {
+    const s = new THREE.Mesh(stickGeo, stickMat); s.position.set(dx, .25, 0); s.rotation.z = (i - 1) * .1; g.add(s);
+    const t = new THREE.Mesh(new THREE.SphereGeometry(.016, 6, 6), tipMat); t.position.set(dx - Math.sin((i - 1) * .1) * .25, .5, 0); g.add(t);
+  });
+  g.position.set(x, y, z); scene.add(g);
+  const e = addSmoke(V(x, y + .52, z), 16, life); e.group = g;
+}
+const lastOffer = {};
+async function offerIncense(pid) {
+  const now = Date.now();
+  if (lastOffer[pid] && now - lastOffer[pid] < 60e3) { toast('香已點上，請稍候再上'); return; }
+  const who = await getWho(); if (who === null) return;
+  lastOffer[pid] = now;
+  const p = pid === 'all' ? null : byId[pid];
+  // 畫面：牌位前插香、香煙
+  if (p) {
+    const t = tablets[p.id];
+    const by = p.alive ? p.y : p.y - BOT_OFF + .14;
+    const bowl = new THREE.Mesh(new THREE.CylinderGeometry(.13, .1, .14, 16), M.bronze); bowl.position.set(p.x, by + .07, .42); scene.add(bowl);
+    plantIncense(p.x, by + .1, .42, 120e3);
+    setTimeout(() => scene.remove(bowl), 120e3);
+    if (t) t.offerGlow = performance.now();
+  } else {
+    plantIncense(altarTipBase.x + (Math.random() - .5) * .16, altarTipBase.y, altarTipBase.z, 120e3);
+  }
+  const name = p ? p.name : '歷代祖先';
+  const rec = { pid, name, who: who || '族人', at: Date.now() };
+  // 狀態更新（先本機，再送雲端）
+  const st = RITE.state, day = twDay().s;
+  st.total = (st.total || 0) + 1; st.days[day] = (st.days[day] || 0) + 1; st.byPid[pid] = (st.byPid[pid] || 0) + 1;
+  st.recent = [rec, ...(st.recent || [])].slice(0, 40);
+  if (RITE.online) {
+    try { const r = await riteFetch('/incense', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(rec) }); if (r && r.state) RITE.state = { ...RITE.state, ...r.state }; }
+    catch (e) { RITE.online = false; saveLocal(); }
+  } else saveLocal();
+  toast(`${rec.who} 為 ${name} 上香・今日第 ${RITE.state.days[day] || 1} 炷`);
+  if (selected === pid) openCard(byId[pid]);
+}
+
+/* ---------- 語音口述 ---------- */
+const MY_VOICES_KEY = 'zupu_my_voices';
+const myVoices = () => { try { return JSON.parse(localStorage.getItem(MY_VOICES_KEY) || '{}'); } catch (e) { return {}; } };
+const fmtSec = s => `${Math.floor(s / 60)}:${String(Math.round(s % 60)).padStart(2, '0')}`;
+let curAudio = null;
+function playVoice(v, btn) {
+  if (curAudio) { curAudio.pause(); document.querySelectorAll('.vplay.on').forEach(b => b.classList.remove('on')); if (curAudio._id === v.id) { curAudio = null; return; } }
+  curAudio = new Audio(RITE_API + '/voice/' + encodeURIComponent(v.id) + '?f=' + FAMILY); curAudio._id = v.id;
+  curAudio.onended = () => { btn.classList.remove('on'); curAudio = null; };
+  curAudio.play().then(() => btn.classList.add('on')).catch(() => toast('無法播放這段錄音'));
+}
+async function deleteVoice(pid, v) {
+  const key = myVoices()[v.id]; if (!key) return;
+  if ((await askText('刪除這段錄音？', '輸入「刪除」確認')) !== '刪除') return;
+  try {
+    const r = await riteFetch('/voice/' + encodeURIComponent(v.id) + '?key=' + encodeURIComponent(key), { method: 'DELETE' });
+    if (r && r.state) RITE.state = { ...RITE.state, ...r.state };
+    toast('已刪除'); openCard(byId[pid]);
+  } catch (e) { toast('刪除失敗，請稍後再試'); }
+}
+function renderVoices(p) {
+  const box = card.querySelector('.voices');
+  const list = (RITE.state.voices && RITE.state.voices[p.id]) || [];
+  box.innerHTML = list.length ? '<h5>語音口述</h5>' : '';
+  const mine = myVoices();
+  list.forEach(v => {
+    const row = document.createElement('div'); row.className = 'vrow';
+    row.innerHTML = `<button class="vplay">▶</button><span><b>${escH(v.title || '口述')}</b><small>${escH(v.who || '')}・${fmtSec(v.dur || 0)}</small></span>${mine[v.id] ? '<button class="vdel">刪除</button>' : ''}`;
+    row.querySelector('.vplay').onclick = e => playVoice(v, e.currentTarget);
+    if (mine[v.id]) row.querySelector('.vdel').onclick = () => deleteVoice(p.id, v);
+    box.appendChild(row);
+  });
+}
+/* 錄音面板 */
+const REC = { mr: null, chunks: [], blob: null, mime: '', t0: 0, timer: 0, pid: null, dur: 0 };
+const REC_MAX = 180;
+function pickMime() {
+  if (!window.MediaRecorder) return null;
+  return ['audio/mp4', 'audio/webm;codecs=opus', 'audio/webm', 'audio/ogg;codecs=opus'].find(m => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m)) || '';
+}
+function openRecorder(pid) {
+  if (!RITE.online) { toast('語音需先部署 arcar 的 /zupu 雲端路由'); return; }
+  if (pickMime() === null || !navigator.mediaDevices) { toast('這個瀏覽器不支援錄音，請用 Safari 或 Chrome 開啟'); return; }
+  REC.pid = pid; REC.blob = null; REC.dur = 0;
+  const el = document.getElementById('recBox');
+  el.querySelector('h4').textContent = `為 ${byId[pid].name} 錄一段口述`;
+  el.querySelector('.title').value = '';
+  setRecUI('idle'); el.classList.add('on');
+}
+function setRecUI(st, msg) {
+  const el = document.getElementById('recBox');
+  el.dataset.st = st;
+  el.querySelector('.tm').textContent = msg || (st === 'rec' ? '錄音中 0:00' : st === 'done' ? `已錄 ${fmtSec(REC.dur)}` : `最長 ${REC_MAX / 60} 分鐘`);
+}
+async function recStart() {
+  try {
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } });
+    REC.mime = pickMime(); REC.chunks = [];
+    REC.mr = REC.mime ? new MediaRecorder(stream, { mimeType: REC.mime }) : new MediaRecorder(stream);
+    REC.mr.ondataavailable = e => e.data && e.data.size && REC.chunks.push(e.data);
+    REC.mr.onstop = () => {
+      stream.getTracks().forEach(t => t.stop());
+      REC.blob = new Blob(REC.chunks, { type: REC.mr.mimeType || REC.mime || 'audio/mp4' });
+      REC.dur = (performance.now() - REC.t0) / 1000;
+      clearInterval(REC.timer); setRecUI('done');
+      const a = document.querySelector('#recBox audio'); a.src = URL.createObjectURL(REC.blob);
+    };
+    REC.mr.start(1000); REC.t0 = performance.now(); setRecUI('rec');
+    REC.timer = setInterval(() => {
+      const s = (performance.now() - REC.t0) / 1000;
+      setRecUI('rec', `錄音中 ${fmtSec(s)}`);
+      if (s >= REC_MAX) recStop();
+    }, 500);
+  } catch (e) { setRecUI('idle', '無法使用麥克風，請在設定中允許'); }
+}
+function recStop() { if (REC.mr && REC.mr.state !== 'inactive') REC.mr.stop(); }
+async function recUpload() {
+  if (!REC.blob) return;
+  if (REC.blob.size > 4.5e6) { toast('錄音太長，請重錄短一點'); return; }
+  const who = await getWho(); if (who === null) return;
+  const el = document.getElementById('recBox'), title = el.querySelector('.title').value.trim() || '口述';
+  setRecUI('up', '上傳中…');
+  try {
+    const q = `?pid=${encodeURIComponent(REC.pid)}&who=${encodeURIComponent(who)}&title=${encodeURIComponent(title)}&dur=${Math.round(REC.dur)}`;
+    const r = await riteFetch('/voice' + q, { method: 'POST', headers: { 'Content-Type': REC.blob.type || 'audio/mp4' }, body: REC.blob, timeout: 60000 });
+    if (!r || !r.ok) throw new Error(r && r.error);
+    const mv = myVoices(); mv[r.voice.id] = r.key; try { localStorage.setItem(MY_VOICES_KEY, JSON.stringify(mv)); } catch (e) {}
+    RITE.state = { ...RITE.state, ...r.state };
+    el.classList.remove('on'); toast('錄音已保存，全家都聽得到');
+    if (selected === REC.pid) openCard(byId[REC.pid]);
+  } catch (e) { setRecUI('done', '上傳失敗，請再試一次'); }
+}
+function closeRecorder() { recStop(); clearInterval(REC.timer); document.getElementById('recBox').classList.remove('on'); }
+
+/* ---------- 祭祀面板 ---------- */
+function openRitePanel() {
+  const el = document.getElementById('scrollReader'), st = RITE.state, day = twDay().s;
+  const fmtT = t => { const d = new Date(t + 8 * 3600e3); return `${d.getUTCMonth() + 1}/${d.getUTCDate()} ${String(d.getUTCHours()).padStart(2, '0')}:${String(d.getUTCMinutes()).padStart(2, '0')}`; };
+  const ann = ANNIV.filter(a => a.days <= 60);
+  el.querySelector('.body').innerHTML = `<h2>祭 祀</h2>
+    <div class="rstat"><div><b>${st.days[day] || 0}</b><small>今日上香</small></div><div><b>${st.total || 0}</b><small>累計上香</small></div><div><b>${Object.values(st.voices || {}).reduce((s, l) => s + l.length, 0)}</b><small>語音口述</small></div></div>
+    <button class="rbtn" data-act="all">為歷代祖先上香</button>
+    <h3>近期忌日</h3>${ann.length ? ann.map(a => `<div class="rrow" data-pid="${a.p.id}"><b>${escH(a.p.name)}</b><span>${escH(annivLabel(a.p))}</span><em class="${a.days === 0 ? 'hot' : ''}">${a.days === 0 ? '今日' : nextSolarDate(a.days) + '・' + a.days + ' 天後'}</em></div>`).join('') : '<p>六十天內沒有忌日。忌日請在紀念堂「祖先名冊」填寫。</p>'}
+    <h3>上香紀錄</h3>${(st.recent || []).length ? st.recent.slice(0, 20).map(r => `<div class="rrow" data-pid="${r.pid}"><b>${escH(r.who)}</b><span>為 ${escH(r.name)} 上香</span><em>${fmtT(r.at)}</em></div>`).join('') : '<p>還沒有上香紀錄。</p>'}
+    <p class="rnote">${RITE.online ? '紀錄已與家人同步。' : '目前為本機模式：紀錄只存在這台裝置（雲端路由尚未部署）。'}</p>`;
+  el.querySelector('.rbtn').onclick = () => { el.classList.remove('on'); offerIncense('all'); };
+  el.querySelectorAll('.rrow[data-pid]').forEach(r => r.onclick = () => { if (byId[r.dataset.pid]) { el.classList.remove('on'); selectPerson(r.dataset.pid); } });
+  el.classList.add('on'); el.querySelector('.body').scrollTop = 0;
+}
+
+/* 沿革展讀 */
+function openHistory() {
+  const el = document.getElementById('scrollReader');
+  const t = historyText();
+  el.querySelector('.body').innerHTML = t.split('\n').map(s => s.trim()).filter(Boolean).map((s, i) =>
+    i === 0 ? `<h2>${escH(s)}</h2>` : /^[一二三四五六七八九十]+、/.test(s) ? `<h3>${escH(s)}</h3>` : `<p>${escH(s)}</p>`).join('');
+  el.classList.add('on'); el.querySelector('.body').scrollTop = 0;
+}
+function openZibei(gen) {
+  const el = document.getElementById('scrollReader');
+  const zi = [...HALL.zibei];
+  const cells = zi.map((c, i) => {
+    const lg = i + HALL.zibeiLocalGen, ppl = PEOPLE.filter(p => p.gen === lg && p.role === 'main' && !p.empty);
+    return `<div class="zb${lg === gen ? ' on' : ''}"><b>${c}</b><small>${cnNum(HALL.zibeiStartWorld + i)}世</small>${lg <= MAX_GEN ? `<em>本支第${CN[lg] || lg}世${ppl.length ? '・' + ppl.map(p => escH(p.name)).join('、') : ''}</em>` : ''}</div>`;
+  }).join('');
+  el.querySelector('.body').innerHTML = `<h2>龍山派字輩（昭穆）</h2><p>自大宗第六十六世「奎」字輩起排列；本支第二世曾奎德即「奎」字輩。</p><div class="zbgrid">${cells}</div>`;
+  el.classList.add('on'); el.querySelector('.body').scrollTop = 0;
+}
+function openPlaque() {
+  const el = document.getElementById('scrollReader');
+  el.querySelector('.body').innerHTML = `<h2>${escH(HALL.plaque)}</h2>
+    <p>曾氏後人奉孔子弟子曾子（曾參）為宗聖始祖，以「三省堂」、「武城堂」為堂號，傳承「忠恕」家風。</p>
+    <p>堂號取自曾子「吾日三省吾身」，勉勵後代修身齊家，承先啟後。</p>
+    <h3>楹聯</h3><p>上聯：${escH(HALL.couplet[0])}<br>下聯：${escH(HALL.couplet[1])}</p>`;
+  el.classList.add('on');
+}
+const escH = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------- 水墨遠山 ---------- */
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; }; }
+function ridge(n, rough, seed) {
+  const rnd = mulberry32(seed), a = new Array(n).fill(0);
+  a[0] = rnd(); a[n - 1] = rnd();
+  let step = n - 1, amp = 1;
+  while (step > 1) { const h = step / 2; for (let i = h; i < n; i += step) a[i] = (a[i - h] + a[i + h]) / 2 + (rnd() - .5) * amp; amp *= rough; step = h; }
+  const mn = Math.min(...a), mx = Math.max(...a); return a.map(v => (v - mn) / (mx - mn));
+}
+function mountainTexture(seed, alpha) {
+  const W = 1024, H = 1024, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  [.22, .5, .8].forEach((f, k) => {
+    const pts = ridge(257, .55, seed * 13 + k * 7), base = f * H, hgt = 150 + k * 20, fade = 170;
+    g.beginPath(); g.moveTo(0, base + fade);
+    pts.forEach((v, i) => g.lineTo(i / (pts.length - 1) * W, base - v * hgt));
+    g.lineTo(W, base + fade); g.closePath();
+    const gr = g.createLinearGradient(0, base - hgt, 0, base + fade);
+    gr.addColorStop(0, `rgba(38,34,30,${alpha})`); gr.addColorStop(.45, `rgba(60,54,46,${alpha * .6})`); gr.addColorStop(1, 'rgba(60,54,46,0)');
+    g.fillStyle = gr; g.fill();
+  });
+  const t = new THREE.CanvasTexture(c); t.colorSpace = THREE.SRGBColorSpace; return t;
+}
+function buildBackdrop(cy) {
+  [[-28, .42, 3], [-48, .3, 9], [-75, .2, 21]].forEach(([z, a, seed]) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(220, 220 * .55),
+      new THREE.MeshBasicMaterial({ map: mountainTexture(seed, a), transparent: true, depthWrite: false, fog: false }));
+    m.position.set(0, cy, z); scene.add(m);
+  });
+  const sunM = new THREE.Mesh(new THREE.CircleGeometry(5.5, 48),
+    new THREE.MeshBasicMaterial({ color: '#c8553d', transparent: true, opacity: .35, depthWrite: false, fog: false }));
+  sunM.position.set(-46, cy + 34, -85); scene.add(sunM);
+}
+
+/* ---------- 金粉 ---------- */
+let dust;
+function buildDust(b) {
+  const N = 520, pos = new Float32Array(N * 3), sp = new Float32Array(N);
+  for (let i = 0; i < N; i++) {
+    pos[i * 3] = THREE.MathUtils.lerp(b.minX - 6, b.maxX + 6, Math.random());
+    pos[i * 3 + 1] = THREE.MathUtils.lerp(b.minY - 4, b.maxY + 4, Math.random());
+    pos[i * 3 + 2] = THREE.MathUtils.lerp(-7, 6, Math.random());
+    sp[i] = .15 + Math.random() * .35;
+  }
+  const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  dust = new THREE.Points(geo, new THREE.PointsMaterial({ size: .09, map: softTex('rgba(255,215,110,1)', 'rgba(210,150,40,0)'),
+    transparent: true, depthWrite: false, color: '#e6b84a' }));
+  dust.userData = { sp, b }; scene.add(dust);
+}
+
+/* ================= 鏡頭 ================= */
+let bounds;
+function computeBounds() {
+  const xs = PEOPLE.map(p => p.x), ys = PEOPLE.map(p => p.y);
+  bounds = { minX: Math.min(...xs) - TW, maxX: Math.max(...xs) + TW, minY: Math.min(...ys) - BOT_OFF - .4, maxY: Math.max(...ys) + TOP_OFF + .2 };
+  if (plaquePos) { bounds.minX = Math.min(bounds.minX, hallExt.minX); bounds.maxX = Math.max(bounds.maxX, hallExt.maxX); bounds.maxY = Math.max(bounds.maxY, plaquePos.y + .8); }
+}
+function fitDist(w, h) {
+  const t = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2));
+  return Math.max(h / 2 / t, w / 2 / (t * camera.aspect));
+}
+function overviewView() {
+  const cx = (bounds.minX + bounds.maxX) / 2, cy = (bounds.minY + bounds.maxY) / 2;
+  const d = fitDist((bounds.maxX - bounds.minX) * 1.15, (bounds.maxY - bounds.minY) * 1.12);
+  return [V(cx + d * .22, cy + d * .06, d), V(cx, cy, 0)];
+}
+function genView(g) {
+  const ps = PEOPLE.filter(p => p.gen === g), xs = ps.map(p => p.x);
+  const cx = (Math.min(...xs) + Math.max(...xs)) / 2, y = ps[0].y;
+  if (g === 1 && plaquePos) {   // 第一世連同匾額、對聯一起入鏡
+    const d = Math.max(6.5, fitDist(4.8, GEN_H * 1.3));
+    return [V(cx + d * .12, y + 1.1, d), V(cx, y + .7, 0)];
+  }
+  const d = Math.max(5.5, fitDist(Math.max(...xs) - Math.min(...xs) + TW + 1.4, GEN_H * .95));
+  return [V(cx + d * .14, y + .5, d), V(cx, y + .1, 0)];
+}
+
+let flight = null;
+const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
+function flyTo([pos, tgt], dur = 1.2) {
+  if (flight) flight.res();
+  return new Promise(res => {
+    flight = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos, t1: tgt, start: performance.now(), dur: dur * 1000, res };
+  });
+}
+
+let tourId = 0, touring = false;
+async function tour() {
+  const my = ++tourId; touring = true;
+  await flyTo(genView(1), 1.4);
+  for (let g = 1; g <= MAX_GEN; g++) {
+    if (my !== tourId) return;
+    setGen(g);
+    if (g > 1) await flyTo(genView(g), 1.1);
+    if (my !== tourId) return;
+    await sleep(650);
+  }
+  if (my !== tourId) return;
+  touring = false; setGen(0);
+  await flyTo(overviewView(), 1.8);
+}
+function stopTour() { if (touring) { tourId++; touring = false; } }
+
+/* ================= UI ================= */
+const genTag = document.getElementById('genTag');
+const bar = document.getElementById('bar');
+const genBtns = [];
+function setGen(g) {
+  genBtns.forEach((b, i) => b.classList.toggle('on', i + 1 === g));
+  if (g) { genTag.textContent = `第${CN[g]}世`; genTag.classList.add('on'); } else genTag.classList.remove('on');
+}
+function buildBar() {
+  for (let g = 1; g <= MAX_GEN; g++) {
+    const b = document.createElement('button'); b.textContent = CN[g];
+    b.onclick = () => { stopTour(); closeCard(); setGen(g); flyTo(genView(g)); };
+    bar.appendChild(b); genBtns.push(b);
+  }
+  bar.insertAdjacentHTML('beforeend', '<span class="sep"></span>');
+  const mk = (t, f) => { const b = document.createElement('button'); b.textContent = t; b.onclick = f; bar.appendChild(b); };
+  mk('全覽', () => { stopTour(); closeCard(); setGen(0); flyTo(overviewView(), 1.4); });
+  mk('導覽', () => { closeCard(); tour(); });
+  mk('祭祀', () => { stopTour(); closeCard(); openRitePanel(); });
+  if (towerHall) mk('塔位', () => { stopTour(); closeCard(); setGen(0); flyTo(towerView(null), 1.6); });
+  mk('沿革', () => { stopTour(); closeCard(); openHistory(); });
+  mk('字輩', () => { stopTour(); closeCard(); openZibei(0); });
+  mk('存圖', exportPoster);
+  mk('紀念堂', () => { location.href = '/zupu/index.html'; });
+}
+
+const card = document.getElementById('card');
+let selected = null;
+function openCard(p) {
+  const main = p.role === 'main' ? p : byId[p.spouseOf];
+  card.querySelector('.nm').textContent = p.name;
+  card.querySelector('.gn').textContent = `第${CN[p.gen]}世` + (p.role === 'spouse' ? '・配偶' : '');
+  const tg = card.querySelector('.tg'); tg.textContent = p.tag || ''; tg.style.display = p.tag ? '' : 'none';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const rows = [];
+  if (p.empty) rows.push(['說明', `${main.name} 未有配偶記錄`]);
+  else {
+    rows.push(['身分', p.alive ? '在世' : p.role === 'main' ? (p.tag ? `${p.tag}・主脈` : '主脈') : `${main.name} 之配偶`]);
+    if (!p.alive) rows.push(['神位', p.tabletText]);
+    if (p.alias) rows.push(['字號', p.alias]);
+    rows.push([p.alive ? '生辰' : '生卒', p.lines ? p.lines.join(' ').replace('— ', '～') : '待補']);
+    if (p.role === 'main' && p.spouse && !p.spouse.empty) rows.push(['配偶', p.spouse.name]);
+    if (main.parent) rows.push(['父系', byId[main.parent].name]);
+    if (main.children.length) rows.push(['子嗣', main.children.map(c => c.name).join('、')]);
+    const z = zibeiOf(p.gen); if (z.ch && p.role === 'main') rows.push(['字輩', `「${z.ch}」字輩・大宗第${cnNum(z.world)}世`]);
+    if (!p.alive && p.death) {
+      const a = ANNIV.find(x => x.p === p);
+      rows.push(['忌日', annivLabel(p) + (a ? (a.days === 0 ? '・今日' : `・${nextSolarDate(a.days)}（還有 ${a.days} 天）`) : '')]);
+    }
+    if (!p.alive && RITE.state.byPid[p.id]) rows.push(['上香', `${RITE.state.byPid[p.id]} 炷`]);
+    const pl = placementOf(p);
+    if (pl) rows.push(['塔位', `${TOWERS[pl.tower].name}・${['一','二','三','四','五'][+pl.floor]}樓・${slotLabel(pl.tower, +pl.floor, +pl.slot)}號`]);
+  }
+  card.querySelector('.tw').style.display = (towerHall && placementOf(p)) ? '' : 'none';
+  card.querySelector('.inc').style.display = (p.empty || p.alive) ? 'none' : '';
+  card.querySelector('.rec').style.display = p.empty ? 'none' : '';
+  renderVoices(p);
+  card.querySelector('dl').innerHTML = rows.map(([a, b]) => `<dt>${a}</dt><dd>${esc(b)}</dd>`).join('');
+  const av = card.querySelector('.av');
+  av.style.display = p.avatar ? '' : 'none'; if (p.avatar) av.src = p.avatar;
+  const bio = card.querySelector('.bio');
+  bio.style.display = p.bio ? '' : 'none'; bio.textContent = p.bio || '';
+  const fb = card.querySelector('.flip');
+  fb.style.display = (p.empty || p.alive) ? 'none' : '';
+  fb.textContent = tablets[p.id].flip ? '看正面神位' : '翻面看生平';
+  card.classList.add('on');
+}
+function closeCard() {
+  card.classList.remove('on', 'mini');
+  if (selected) { const t = tablets[selected]; t.front.emissiveIntensity = 0; t.flip = 0; selected = null; }
+}
+card.querySelector('.inc').onclick = () => selected && offerIncense(selected);
+card.querySelector('.rec').onclick = () => selected && openRecorder(selected);
+card.querySelector('.tw').onclick = () => {
+  if (!selected) return;
+  const id = selected; closeCard(); setGen(0); flyTo(towerView(id), 1.6);
+};
+card.querySelector('.flip').onclick = () => {
+  if (!selected) return;
+  const t = tablets[selected]; t.flip = t.flip ? 0 : 1;
+  card.classList.toggle('mini', !!t.flip);
+  card.querySelector('.flip').textContent = t.flip ? '看正面神位' : '翻面看生平';
+};
+card.querySelector('.x').onclick = closeCard;
+
+function selectPerson(id) {
+  stopTour(); closeCard();
+  const p = byId[id]; selected = id; setGen(p.gen);
+  openCard(p);
+  // 卡片在下方，鏡頭目標略往下讓牌位在畫面上半
+  const d = Math.max(8.6, fitDist(TW * 3.2, 9));
+  flyTo([V(p.x + d * .1, p.y - .7, d), V(p.x, p.y - 1.55, 0)], 1.0);
+}
+
+/* 點擊判斷（與拖曳區分） */
+const ray = new THREE.Raycaster(), ndc = new THREE.Vector2();
+let down = null;
+canvas.addEventListener('pointerdown', e => { down = { x: e.clientX, y: e.clientY, t: performance.now() }; if (touring) stopTour(); if (flight) { flight.res(); flight = null; } });
+canvas.addEventListener('pointerup', e => {
+  if (!down) return;
+  const moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t; down = null;
+  if (moved > 8 || dt > 450) return;
+  const r = canvas.getBoundingClientRect();
+  ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+  ray.setFromCamera(ndc, camera);
+  const hit = ray.intersectObjects(pickables, false)[0];
+  if (!hit) return closeCard();
+  const act = hit.object.userData.action;
+  if (!act) return selectPerson(hit.object.userData.pid);
+  stopTour(); closeCard();
+  if (act === 'incense-all') offerIncense('all');
+  else if (act === 'history') openHistory();
+  else if (act === 'plaque') openPlaque();
+  else if (act.startsWith('zibei')) openZibei(+act.split(':')[1] || 0);
+});
+
+/* ---------- 海報輸出（含標題與印章） ---------- */
+const posterEl = document.getElementById('poster');
+(() => {
+  const r = document.getElementById('recBox');
+  r.querySelector('.go').onclick = recStart; r.querySelector('.stop').onclick = recStop;
+  r.querySelector('.redo').onclick = () => { REC.blob = null; recStart(); };
+  r.querySelector('.ok').onclick = recUpload; r.querySelector('.no').onclick = closeRecorder;
+})();
+document.querySelector('#scrollReader .close').onclick = () => document.getElementById('scrollReader').classList.remove('on');
+posterEl.querySelector('button').onclick = () => posterEl.classList.remove('on');
+function exportPoster() {
+  renderer.render(scene, camera);
+  const src = renderer.domElement, s = src.width / innerWidth;
+  const c = document.createElement('canvas'); c.width = src.width; c.height = src.height;
+  const g = c.getContext('2d');
+  g.drawImage(src, 0, 0);
+  g.fillStyle = '#8b1a1a'; g.font = `900 ${22 * s}px ${FONT}`; g.textBaseline = 'top';
+  g.fillText('龍山派 曾氏族譜', 18 * s, 18 * s);
+  g.fillStyle = '#7a5a2a'; g.font = `400 ${11 * s}px ${FONT}`;
+  g.fillText('立 體 世 系 祠 堂', 18 * s, 48 * s);
+  const w = 64 * s, x = c.width - w - 20 * s, y = c.height - w - 20 * s;
+  g.save(); g.translate(x + w / 2, y + w / 2); g.rotate(-.1);
+  g.strokeStyle = '#a82020'; g.lineWidth = 3 * s; g.strokeRect(-w / 2, -w / 2, w, w);
+  g.fillStyle = '#a82020'; g.font = `900 ${14 * s}px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  ['曾氏', '龍山', '族譜'].forEach((t, i) => g.fillText(t, 0, (i - 1) * 17 * s));
+  g.restore();
+  const url = c.toDataURL('image/png');
+  posterEl.querySelector('img').src = url;
+  posterEl.querySelector('a').href = url;
+  posterEl.classList.add('on');
+}
+
+/* ---------- 尺寸 ---------- */
+function resize() {
+  const w = innerWidth, h = innerHeight;
+  renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix();
+}
+addEventListener('resize', resize);
+if (window.visualViewport) visualViewport.addEventListener('resize', resize);
+
+/* ================= 動畫迴圈 ================= */
+const clock = new THREE.Clock();
+const tMin = new THREE.Vector3(), tMax = new THREE.Vector3();
+function loop() {
+  const dt = Math.min(clock.getDelta(), .05), now = performance.now(), T = now / 1000;
+
+  if (flight) {
+    const k = Math.min(1, (now - flight.start) / flight.dur), e = ease(k);
+    camera.position.lerpVectors(flight.p0, flight.p1, e);
+    controls.target.lerpVectors(flight.t0, flight.t1, e);
+    camera.lookAt(controls.target);
+    if (k >= 1) { const r = flight.res; flight = null; controls.update(); r(); }
+  } else {
+    controls.target.clamp(tMin, tMax);
+    controls.update();
+  }
+
+  if (selected) tablets[selected].front.emissiveIntensity = .18 + .14 * Math.sin(T * 3);
+  for (const id in tablets) {
+    const t = tablets[id], goal = t.flip * Math.PI;
+    if (id !== selected) {
+      let e = 0;
+      if (t.memorial) e = .22 + .16 * Math.sin(T * 2);
+      if (t.offerGlow) { const k = (now - t.offerGlow) / 3000; if (k < 1) e = Math.max(e, .5 * (1 - k)); else t.offerGlow = 0; }
+      t.front.emissiveIntensity = e;
+    }
+    if (t.aura) t.aura.material.opacity = .45 + .2 * Math.sin(T * 2);
+    if (Math.abs(t.grp.rotation.y - goal) > .001) t.grp.rotation.y += (goal - t.grp.rotation.y) * Math.min(1, dt * 5);
+    if (t.sway !== undefined) t.grp.rotation.z = Math.sin(T * .9 + t.sway) * .025;
+  }
+
+  if (dust) {
+    const a = dust.geometry.attributes.position, { sp, b } = dust.userData;
+    for (let i = 0; i < sp.length; i++) {
+      let y = a.getY(i) + sp[i] * dt;
+      if (y > b.maxY + 4) y = b.minY - 4;
+      a.setY(i, y); a.setX(i, a.getX(i) + Math.sin(T * .6 + i) * .002);
+    }
+    a.needsUpdate = true;
+  }
+  for (let k = emitters.length - 1; k >= 0; k--) {
+    const e = emitters[k];
+    if (e.until && now > e.until) {
+      e.sprites.forEach(sp => { scene.remove(sp); sp.material.dispose(); });
+      if (e.group) scene.remove(e.group);
+      emitters.splice(k, 1); continue;
+    }
+    const fadeIn = Math.min(1, (now - e.born) / 1500), fadeOut = e.until ? Math.min(1, (e.until - now) / 4000) : 1;
+    e.sprites.forEach(sp => {
+      const t = (sp.userData.t + T * .12) % 1;
+      sp.position.set(e.pos.x + Math.sin(t * 9 + sp.userData.t * 20) * .15 * t, e.pos.y + t * 2.6, e.pos.z - t * .3);
+      sp.scale.setScalar(.15 + t * .9);
+      sp.material.opacity = Math.sin(t * Math.PI) * .55 * fadeIn * fadeOut;
+    });
+  }
+
+  renderer.render(scene, camera);
+}
+
+/* ================= 啟動 ================= */
+async function start() {
+  const introT0 = performance.now();
+  const riteP = loadRite();
+  await waitFonts();
+  PEOPLE.forEach(buildTablet);
+  buildLines();
+  buildAltar();
+  buildHall();
+  computeBounds();
+  buildBackdrop((bounds.minY + bounds.maxY) / 2);
+  buildDust(bounds);
+  buildBar();
+  computeAnniv();
+  tMin.set(bounds.minX - 4, bounds.minY - 4, -3); tMax.set(bounds.maxX + 4, bounds.maxY + 4, 3);
+  if (towerHall) { tMax.x = towerHall.x + 4; tMin.y = Math.min(tMin.y, towerHall.bottom - 2); }
+
+  const [p0, t0] = genView(1);
+  camera.position.copy(p0).add(V(0, 4, 6)); controls.target.copy(t0); camera.lookAt(t0);
+  renderer.setAnimationLoop(loop);
+  window.__zupuReady = true;
+
+  const intro = document.getElementById('intro');
+  let skipped = false;
+  const todayAnniv = ANNIV.find(a => a.days === 0);
+  riteP.then(() => { showRiteBanner(); if (selected) openCard(byId[selected]); });
+  intro.addEventListener('pointerdown', () => {
+    if (skipped) return; skipped = true; intro.classList.add('hide');
+    stopTour();
+    if (todayAnniv) selectPerson(todayAnniv.p.id); else flyTo(overviewView(), 1.2);
+  });
+  await sleep(Math.max(0, 2600 - (performance.now() - introT0)));
+  if (skipped) return;
+  intro.classList.add('hide'); skipped = true;
+  if (todayAnniv) { await flyTo(genView(1), 1.4); selectPerson(todayAnniv.p.id); }   // 忌日當天：直接帶到該位祖先
+  else tour();
+}
+start();
+
+// PWA：離線快取
+if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+</script>
+</body>
+</html>
