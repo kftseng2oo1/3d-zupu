@@ -1,5 +1,5 @@
 // 曾氏族譜 3D 祠堂 Service Worker
-const CACHE = '3d-zupu-v8';
+const CACHE = '3d-zupu-v9';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
