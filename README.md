@@ -37,3 +37,4 @@ if (url.pathname.startsWith('/zupu')) {
 | `manifest.json`、`sw.js` | PWA 設定與離線快取（three.js、字型會快取） |
 | `icon.svg`、`icon-192.png`、`icon-512.png`、`apple-touch-icon.png` | 圖示（神位牌「曾」字） |
 | `worker/zupu-module.js` | 祭祀雲端後端模組 |
+| `audio/xinjing-*.mp3`、`*.json` | 《心經》誦念音檔（曉臻 hsiaochen、曉雨 hsiaoyu、雲哲 yunjhe）與逐字時間軸，由 kftseng2oo1/tts-studio 的 `jobs/xinjing` 產生 |

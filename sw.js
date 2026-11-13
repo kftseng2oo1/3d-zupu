@@ -1,5 +1,5 @@
 // 曾氏族譜 3D 祠堂 Service Worker
-const CACHE = '3d-zupu-v6';
+const CACHE = '3d-zupu-v7';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
@@ -24,6 +24,8 @@ self.addEventListener('fetch', e => {
     return;
   }
   if (url.origin !== location.origin) return;
+  // 誦經音檔：iOS 以 Range 分段讀取，交給瀏覽器直接處理，不經快取
+  if (/\.mp3$/.test(url.pathname)) return;
   // 本站檔案：先給快取，背景更新
   e.respondWith(caches.match(req).then(hit => {
     const net = fetch(req).then(res => {
