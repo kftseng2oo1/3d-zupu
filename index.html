@@ -48,6 +48,11 @@
     background:linear-gradient(to top,rgba(42,26,8,.92),rgba(42,26,8,.75));border-top:1px solid var(--gold);
     display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
   #bar::-webkit-scrollbar{display:none}
+  #bar.more{-webkit-mask-image:linear-gradient(to right,#000 84%,transparent);mask-image:linear-gradient(to right,#000 84%,transparent)}
+  #barMore{position:fixed;right:6px;bottom:calc(var(--sb) + 16px);z-index:7;display:none;width:30px;height:30px;border-radius:50%;border:1px solid var(--gold);
+    background:rgba(42,26,8,.9);color:#f6d98a;font-size:18px;line-height:26px;text-align:center;font-weight:900;animation:nudge 1.6s ease-in-out infinite}
+  #barMore.on{display:block}
+  @keyframes nudge{50%{transform:translateX(4px)}}
   #bar button{flex:0 0 auto;min-width:38px;min-height:calc(40px * var(--fs));padding:0 10px;border:1px solid #8b6020;border-radius:3px;
     background:#3d2006;color:var(--gold-l);font-family:var(--font);font-size:calc(15px * var(--fs));font-weight:700;cursor:pointer}
   #bar button.on{background:var(--gold);color:#2a1505;border-color:var(--gold-l)}
@@ -100,11 +105,11 @@
   /* 祭祀 */
   #riteBanner{position:fixed;left:50%;top:calc(var(--st) + 64px);transform:translateX(-50%);z-index:6;display:none;cursor:pointer;
     background:linear-gradient(90deg,#5a0d0d,#8b1a1a,#5a0d0d);border:1px solid var(--gold-l);border-radius:3px;padding:7px 16px;text-align:center;
-    box-shadow:0 0 18px rgba(255,190,80,.55);max-width:86vw}
+    box-shadow:0 0 18px rgba(255,190,80,.55);max-width:94vw}
   #riteBanner.on{display:block;animation:glow 2.4s ease-in-out infinite}
   @keyframes glow{50%{box-shadow:0 0 30px rgba(255,200,90,.9)}}
-  #riteBanner b{display:block;color:#f6d98a;font-size:calc(15px * var(--fs));letter-spacing:.12em}
-  #riteBanner span{display:block;color:#f3e3b8;font-size:calc(12px * var(--fs));margin-top:2px}
+  #riteBanner b{display:block;color:#f6d98a;font-size:min(calc(15px * var(--fs)),4.3vw);letter-spacing:.08em;white-space:nowrap}
+  #riteBanner span{display:block;color:#f3e3b8;font-size:min(calc(12px * var(--fs)),3.5vw);margin-top:2px;white-space:nowrap}
   #toast{position:fixed;left:50%;top:calc(var(--st) + 128px);transform:translate(-50%,-10px);z-index:40;opacity:0;pointer-events:none;transition:all .3s;
     background:rgba(42,26,8,.92);color:var(--gold-l);border:1px solid var(--gold);padding:9px 16px;border-radius:3px;font-size:calc(14px * var(--fs));max-width:88vw;text-align:center}
   #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -164,7 +169,7 @@
   .rbtn.revery{margin-top:8px;background:#fff8ec;color:#8b1a1a;border:1px solid #8b1a1a}
   .rbtn.rchant{margin-top:8px;background:linear-gradient(90deg,#2a1a08,#4a2e10,#2a1a08);border-color:#6b4a1a}
   .rtoday{font-size:calc(14px * var(--fs))!important;text-align:center;color:#5a3a10!important;margin:0 0 10px!important}
-  .rnote{font-size:calc(12px * var(--fs))!important;color:#7a5a2a!important;margin-top:12px}
+  .rnote{font-size:calc(12px * var(--fs))!important;color:#7a5a2a!important;margin-top:12px;margin-bottom:34px!important}
 
   /* 念經 */
   #sutra{position:fixed;left:0;right:0;bottom:0;top:34vh;z-index:28;display:none;padding:0 8px calc(var(--sb) + 8px)}
@@ -310,6 +315,14 @@
   #dzBox .ofr{background:#8b1a1a;color:#f6d98a}
   #dzBox .chn{background:#2a1a08;color:#f6d98a}
   #dzBox .see{background:#fbf4e2;color:#5a0d0d}
+  /* 手機橫放：殿內面板移到右側、縮小，左邊留給 3D 畫面 */
+  @media (orientation:landscape) and (max-height:520px){
+    #dzBox,#pilBox,#charBox{left:auto;right:0;width:min(50vw,520px)}
+    #dzBox .sheet,#pilBox .sheet,#charBox .sheet{max-height:94vh;overflow:auto;padding-top:8px}
+    #dzBox .sub{display:none}
+    #dzBox .row{margin-bottom:5px}
+    #dzBox .row button,#dzBox .bk{min-height:calc(32px * var(--fs))}
+  }
   #dzBox .bd{background:linear-gradient(#6a3a1a,#3a1e0c);color:#f6d98a}
   #dzBox .bk{width:100%;background:#fff8ec;color:#5a0d0d;border-style:dashed}
   #routeBox .dzs{display:flex;gap:6px;margin-top:6px}
@@ -394,6 +407,7 @@
 </div>
 
 <div id="bar"></div>
+<button id="barMore" aria-label="更多功能">›</button>
 
 <div id="intro">
   <div class="scroll">
@@ -3939,6 +3953,12 @@ function buildBar() {
   mk('字輩', () => { stopTour(); closeCard(); openZibei(0); });
   mk('攝影', enterPhoto);
   mk('紀念堂', () => { location.href = '/zupu/index.html'; });
+  // 底列放不下時：右側淡出＋「›」提示，點了往右捲；第一次開啟時輕推一下讓人知道可以滑
+  const more = document.getElementById('barMore');
+  const upd = () => { const over = bar.scrollWidth - bar.clientWidth - bar.scrollLeft > 8; bar.classList.toggle('more', over); more.classList.toggle('on', over && getComputedStyle(bar).display !== 'none'); };
+  bar.addEventListener('scroll', upd, { passive: true }); addEventListener('resize', upd); setInterval(upd, 1500); upd();
+  more.onclick = () => bar.scrollBy({ left: bar.clientWidth * .7, behavior: 'smooth' });
+  setTimeout(() => { if (bar.scrollWidth > bar.clientWidth + 8 && !bar.scrollLeft) { bar.scrollTo({ left: 120, behavior: 'smooth' }); setTimeout(() => bar.scrollTo({ left: 0, behavior: 'smooth' }), 700); } }, 3500);
 }
 
 const card = document.getElementById('card');
