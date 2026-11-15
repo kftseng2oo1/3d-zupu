@@ -310,6 +310,7 @@
   #dzBox .ofr{background:#8b1a1a;color:#f6d98a}
   #dzBox .chn{background:#2a1a08;color:#f6d98a}
   #dzBox .see{background:#fbf4e2;color:#5a0d0d}
+  #dzBox .bd{background:linear-gradient(#6a3a1a,#3a1e0c);color:#f6d98a}
   #dzBox .bk{width:100%;background:#fff8ec;color:#5a0d0d;border-style:dashed}
   #routeBox .dzs{display:flex;gap:6px;margin-top:6px}
   #routeBox .dz.drv{background:linear-gradient(#c9952e,#9a6a12);border-color:#9a6a12;color:#fff8e0}
@@ -514,6 +515,7 @@
     <p class="sub">南無大願地藏王菩薩</p>
     <div class="row"><button class="wsh">祈福</button><button class="ofr">香案供奉</button></div>
     <div class="row r2"><button class="chn">誦《心經》</button><button class="see">瞻仰聖像</button></div>
+    <div class="row r2"><button class="bd">鐘鼓齊鳴</button></div>
     <button class="bk">回掃墓路線</button>
   </div>
 </div>
@@ -2849,6 +2851,7 @@ function buildDizang() {
   const l1 = new THREE.PointLight('#ffe7c2', 3, 14, 1); l1.position.set(0, 4.4, 1.5); D.add(l1);
   const l2 = new THREE.PointLight('#fff4dc', 2.2, 8, 1); l2.position.set(0, 3.2, -.6); D.add(l2);
   DZ.origin = D.position.clone();
+  addBellDrum(D, DZ);
   tMax.x = Math.max(tMax.x, ox + 8); tMin.y = Math.min(tMin.y, oy - 2);
   refreshOfferings();
 }
@@ -3026,6 +3029,7 @@ function buildZhonglingHall() {
   const l1 = new THREE.PointLight('#ffe2c0', 2.6, 14, 1); l1.position.set(0, 4.6, 1.5); D.add(l1);
   const l2 = new THREE.PointLight('#ffd8b0', 1.8, 7, 1); l2.position.set(0, 3, -1); D.add(l2);
   DZ.origin = D.position.clone();
+  addBellDrum(D, DZ);
   tMax.x = Math.max(tMax.x, ox + 8); tMin.y = Math.min(tMin.y, oy - 2);
   refreshOfferings();
 }
@@ -3077,9 +3081,110 @@ function closeDizang(back) {
   el.querySelector('.chn').onclick = () => openSutra(HK);
   el.querySelector('.wsh').onclick = () => { el.classList.remove('on'); flyTo(WISH_VIEW(), 1.2); openWish(); };
   el.querySelector('.see').onclick = () => flyTo(dzView('statue'), 1.4);
+  el.querySelector('.bd').onclick = () => ringCeremony(true);
   el.querySelector('.bk').onclick = () => closeDizang(true);
   el.querySelector('.x').onclick = () => closeDizang(false);
 })();
+
+/* ================= 鐘鼓齊鳴：地藏殿、眾靈祠各設鐘鼓（左鐘右鼓），祈福時齊鳴 ================= */
+function addBellDrum(D, H) {
+  const wood = new THREE.MeshStandardMaterial({ color: '#6a3a1a', roughness: .7 });
+  const goldM = new THREE.MeshStandardMaterial({ color: '#d9a63a', metalness: .55, roughness: .35, emissive: '#3a2406' });
+  const red = new THREE.MeshStandardMaterial({ color: '#b01a14', roughness: .5, emissive: '#200404' });
+  // 鐘（神明左側＝面向神龕的右邊）
+  const B = { t: 9, amp: .3 }, bg = new THREE.Group(); bg.position.set(3.25, 0, 3.4); bg.rotation.y = -.35; D.add(bg);
+  [-1, 1].forEach(sx => { const p = new THREE.Mesh(new THREE.BoxGeometry(.14, 3.0, .14), wood); p.position.set(sx * .7, 1.5, 0); bg.add(p); });
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(1.8, .16, .18), wood); beam.position.y = 3.0; bg.add(beam);
+  const roof = new THREE.Mesh(new THREE.BoxGeometry(2.0, .07, .46), goldM); roof.position.y = 3.13; bg.add(roof);
+  B.pivot = new THREE.Group(); B.pivot.position.y = 2.9; bg.add(B.pivot);
+  const prof = [[0, 0], [.4, 0], [.42, .06], [.36, .28], [.31, .66], [.28, .95], [.2, 1.06], [0, 1.09]].map(([a, b]) => new THREE.Vector2(a, b));
+  const bell = new THREE.Mesh(new THREE.LatheGeometry(prof, 32), new THREE.MeshStandardMaterial({ color: '#6a5a2a', metalness: .75, roughness: .32, emissive: '#1a1404', side: THREE.DoubleSide }));
+  bell.position.y = -1.27; B.pivot.add(bell);
+  [.28, .7].forEach(y => { const r = new THREE.Mesh(new THREE.TorusGeometry(y < .5 ? .35 : .3, .02, 6, 28), goldM); r.rotation.x = Math.PI / 2; r.position.y = -1.27 + y; B.pivot.add(r); });
+  B.striker = new THREE.Group(); B.striker.position.set(0, 2.45, .9); bg.add(B.striker);
+  [-1, 1].forEach(sx => { const rope = new THREE.Mesh(new THREE.CylinderGeometry(.012, .012, .66, 4), red); rope.position.set(sx * .28, -.33, 0); B.striker.add(rope); });
+  const log = new THREE.Mesh(new THREE.CylinderGeometry(.075, .075, .85, 12), wood); log.rotation.x = Math.PI / 2; log.position.set(0, -.68, -.05); B.striker.add(log);
+  // 鼓
+  const Dr = { t: 9, amp: .7, side: false }, dg = new THREE.Group(); dg.position.set(-3.25, 0, 3.4); dg.rotation.y = .35; D.add(dg);
+  [-1, 1].forEach(sx => { const leg = new THREE.Mesh(new THREE.BoxGeometry(.11, 1.5, .11), wood); leg.position.set(sx * .52, .75, 0); leg.rotation.z = sx * .12; dg.add(leg); });
+  const cradle = new THREE.Mesh(new THREE.TorusGeometry(.58, .045, 8, 28, Math.PI), wood); cradle.rotation.z = Math.PI; cradle.position.y = 1.5; dg.add(cradle);
+  const body = new THREE.Group(); body.position.y = 1.55; body.rotation.x = Math.PI / 2; dg.add(body);
+  body.add(new THREE.Mesh(new THREE.CylinderGeometry(.56, .56, .66, 28, 1, true), red));
+  const bul = new THREE.Mesh(new THREE.SphereGeometry(.62, 28, 14), red); bul.scale.set(1, .5, 1); body.add(bul);
+  [-1, 1].forEach(sy => {
+    const skin = new THREE.Mesh(new THREE.CircleGeometry(.56, 28), new THREE.MeshStandardMaterial({ color: '#e8d8b0', roughness: .8, side: THREE.DoubleSide }));
+    skin.rotation.x = sy * Math.PI / 2; skin.position.y = sy * .33; body.add(skin); if (sy > 0) Dr.skin = skin;
+    for (let i = 0; i < 20; i++) { const a = i / 20 * Math.PI * 2, st = new THREE.Mesh(new THREE.SphereGeometry(.02, 6, 4), goldM); st.position.set(Math.cos(a) * .56, sy * .29, Math.sin(a) * .56); body.add(st); }
+  });
+  Dr.sticks = [-1, 1].map(sx => {
+    const pv = new THREE.Group(); pv.position.set(sx * .26, 2.15, .85); dg.add(pv);
+    const st = new THREE.Mesh(new THREE.CylinderGeometry(.024, .03, .66, 8), wood); st.rotation.x = Math.PI / 2 - .5; st.position.set(0, -.14, -.26); pv.add(st);
+    const kn = new THREE.Mesh(new THREE.SphereGeometry(.055, 10, 8), red); kn.position.set(0, -.28, -.55); pv.add(kn);
+    return pv;
+  });
+  H.bell = B; H.drum = Dr;
+}
+function bdAC() {
+  const ac = CHANT.ac || (CHANT.ac = new (window.AudioContext || window.webkitAudioContext)());
+  if (ac.state === 'suspended') ac.resume(); return ac;
+}
+function bdNoise(ac, sec) { const len = ac.sampleRate * sec, b = ac.createBuffer(1, len, ac.sampleRate), d = b.getChannelData(0); for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1; return b; }
+function bigBellSnd(amp) {   // 銅鐘：低沉、長餘韻
+  const ac = bdAC(), t = ac.currentTime, f = 98;
+  [[1, 1, 7], [1.004, .8, 7], [2, .5, 5], [2.42, .35, 4], [3.01, .25, 3], [4.16, .15, 2.2], [5.43, .08, 1.5]].forEach(([m, a, d]) => {
+    const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = f * m;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(a * amp, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d);
+    o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + .1);
+  });
+  const n = ac.createBufferSource(); n.buffer = bdNoise(ac, .3); const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 600;
+  const ng = ac.createGain(); ng.gain.setValueAtTime(amp * .8, t); ng.gain.exponentialRampToValueAtTime(.0001, t + .25); n.connect(lp).connect(ng).connect(ac.destination); n.start(t);
+}
+function bigDrumSnd(amp) {   // 大鼓：低頻下滑＋鼓皮拍擊
+  const ac = bdAC(), t = ac.currentTime, o = ac.createOscillator(), g = ac.createGain();
+  o.frequency.setValueAtTime(95, t); o.frequency.exponentialRampToValueAtTime(42, t + .45);
+  g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(amp, t + .006); g.gain.exponentialRampToValueAtTime(.0001, t + .9);
+  o.connect(g).connect(ac.destination); o.start(t); o.stop(t + 1);
+  const n = ac.createBufferSource(); n.buffer = bdNoise(ac, .2); const lp = ac.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 900;
+  const ng = ac.createGain(); ng.gain.setValueAtTime(amp * .45, t); ng.gain.exponentialRampToValueAtTime(.0001, t + .15); n.connect(lp).connect(ng).connect(ac.destination); n.start(t);
+}
+let bdBusy = false;
+async function ringCeremony(standalone) {
+  const H = HS[HK]; if (!H || !H.bell || bdBusy) return;
+  bdBusy = true; bdAC();
+  const box = document.getElementById('dzBox'); if (standalone) box.classList.remove('on');
+  const cap = document.getElementById('bowCap'); cap.textContent = '鐘鼓齊鳴'; cap.classList.add('on');
+  controls.enabled = false;
+  // 依螢幕寬窄退後，讓鐘、鼓與神龕同時入鏡
+  const half = Math.tan(camera.fov * Math.PI / 360) * camera.aspect, dist = Math.max(8.5, 4.4 / half);
+  await flyTo([dzW(0, 2.4 + dist * .14, 3.4 + dist), dzW(0, 1.5, 1)], 1.3);
+  const sb = a => { H.bell.t = 0; H.bell.amp = a; }, sd = a => { H.drum.t = 0; H.drum.amp = a; H.drum.side = !H.drum.side; };
+  const beats = [0, 900, 1700, 2400, 3000, 3500, 3900, 4250, 4550, 4820, 5070, 5300, 5520, 5730, 5930];   // 鼓聲由緩而急
+  beats.forEach((ms, i) => setTimeout(() => { sd(.55 + i * .015); if (i % 3 === 0) sb(.3); }, ms));
+  [7000, 8600, 10200].forEach(ms => setTimeout(() => { sd(.85); sb(.4); }, ms));   // 最後鐘鼓同響三下
+  await new Promise(r => setTimeout(r, 11800));
+  cap.classList.remove('on'); controls.enabled = true; bdBusy = false;
+  if (standalone) { box.classList.add('on'); flyTo(dzView('enter'), 1.4); }
+}
+function tickBellDrum(dt) {
+  ['dizang', 'zhongling'].forEach(k => {
+    const H = HS[k]; if (!H || !H.bell) return;
+    const B = H.bell, Dr = H.drum;
+    if (B.t < 6) {   // 撞木後拉再撞上，鐘身微晃
+      const bt = B.t; B.t += dt;
+      let a = bt < .35 ? -.7 * Math.sin(bt / .35 * Math.PI / 2) : bt < .5 ? -.7 * (1 - (bt - .35) / .15) : .12 * Math.exp(-(bt - .5) * 3) * Math.sin((bt - .5) * 9);
+      if (bt < .5 && B.t >= .5) bigBellSnd(B.amp);
+      B.striker.rotation.x = a;
+      B.pivot.rotation.x = bt > .5 ? -.05 * Math.exp(-(bt - .5) * 1.2) * Math.sin((bt - .5) * 5) : 0;
+    }
+    if (Dr.t < 2) {
+      const t0 = Dr.t; Dr.t += dt;
+      if (t0 < .12 && Dr.t >= .12) bigDrumSnd(Dr.amp);
+      const k2 = t0 < .12 ? t0 / .12 : 0, hit = t0 < .12 ? 0 : Math.exp(-(t0 - .12) * 18);
+      Dr.sticks.forEach((st, i) => { const act = (i === 0) === Dr.side; st.rotation.x = act ? (t0 < .12 ? -.8 * (1 - k2) : .25 * hit) : 0; });
+      Dr.skin.scale.setScalar(1 + hit * .03);
+    }
+  });
+}
 
 /* ================= 祈福之旅：選角色 → 台61下交流道 → 停車 → 入殿上香三拜 → 祈福 ================= */
 const CHARS = {
@@ -3281,6 +3386,7 @@ async function doWish() {
   el.classList.remove('on');
   const rec = { who: who || CHARS[PIL.key || 'baba'].name, char: PIL.key, hall: HK, wish: ws.join('、'), text, at: Date.now() };
   try { const l = JSON.parse(localStorage.getItem('zupu_wishes') || '[]'); l.push(rec); localStorage.setItem('zupu_wishes', JSON.stringify(l.slice(-50))); } catch (e) {}
+  await ringCeremony(false);   // 祈福時鐘鼓齊鳴
   flyTo([dzW(.4, 2.6, 5.2), dzW(0, 2, -1.2)], 1.4);
   if (PIL.ch) { const ch = PIL.ch; pAnim(900, k => poseChar(ch, { pray: Math.sin(k * Math.PI) })); }
   ws.forEach((w, i) => setTimeout(() => blessFx(w), i * 900));
@@ -4162,7 +4268,7 @@ function loop() {
   }
   chantAudioTick();
   tickRoute(now, dt); tickPilgrim(now, dt); tickFountain(dt, now);
-  tickEmbers(T, dt);
+  tickEmbers(T, dt); tickBellDrum(dt);
   if (steleFront) { steleFront.emissiveIntensity = .05 + .04 * Math.sin(T * 1.3); steleHalo.material.opacity = .42 + .12 * Math.sin(T * 1.3); }
   for (const id in tablets) {
     const t = tablets[id], goal = t.flip * Math.PI;
