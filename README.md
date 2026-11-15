@@ -14,18 +14,8 @@ three.js 打造的立體世系祠堂（單檔 PWA）。網址：https://kftseng2
 
 ## 祭祀雲端（arcar `/zupu`）
 
-上香紀錄與語音要全家共用，需把 `worker/zupu-module.js` 併入 arcar Worker：
-
-1. arcar 新增 KV 綁定 `ZUPU_KV`
-2. 貼入 `handleZupu`、`withZupuCors`、`ZUPU_CORS` 與 `z*` 輔助函式（`export default` 那段不用）
-3. 在 arcar `fetch` 最前面（全域 CORS 之前）加：
-
-```js
-if (url.pathname.startsWith('/zupu')) {
-  if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: ZUPU_CORS });
-  return withZupuCors(await handleZupu(request, env, url.pathname.slice(5), url));
-}
-```
+上香紀錄與語音要全家共用，需部署已併入 `/zupu` 的 arcar Worker **v27**（`kftseng2oo1/grandpa` 的 `worker/arcar-worker_v27.js`），並在 arcar 新增 KV 綁定 `ZUPU_KV`。
+`worker/zupu-module.js` 是同一份後端的獨立模組原稿。
 
 未部署時自動改為本機模式（上香只記在該裝置，語音無法上傳）。
 
