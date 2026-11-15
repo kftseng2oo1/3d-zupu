@@ -29,6 +29,7 @@
   canvas#c{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 
   /* 標題 */
+  body.sidehall #title,body.sidehall #genTag{opacity:0;transition:opacity .4s}
   #title{position:fixed;top:calc(var(--st) + 14px);left:16px;pointer-events:none;z-index:5}
   #title h1{font-size:20px;font-weight:900;color:var(--red);letter-spacing:.25em}
   #title p{font-size:11px;color:#7a5a2a;letter-spacing:.3em;margin-top:2px}
@@ -1736,7 +1737,7 @@ function buildTowerHall() {
           g.fillRect(x + 4, yy + 6, cw - 8, rh - 12);
           g.fillStyle = who ? (hi ? '#3e0808' : '#f6d98a') : '#9a8a66';
           if (who) {
-            const n = [...who[0].name.replace(/^曾/, '')].slice(0, 3), fs = Math.min(30, (rh - 40) / n.length);
+            const n = [...who[0].name.replace(/^曾/, '').replace(/[（(].*$/, '')].slice(0, 3), fs = Math.min(30, (rh - 40) / n.length);
             g.font = `900 ${fs}px ${FONT}`; n.forEach((c, i) => g.fillText(c, x + cw / 2, yy + 22 + fs / 2 + i * fs));
           } else { g.font = `400 18px ${FONT}`; g.fillText(slotLabel(k, f, s), x + cw / 2, yy + rh / 2); }
         }
@@ -1750,6 +1751,7 @@ function buildTowerHall() {
   towerHall.top = 1.8; towerHall.bottom = y;
 }
 function towerView(hiId) {
+  document.body.classList.add('sidehall');   // 側殿看板與左上標題重疊：暫時隱藏標題
   const pl0 = hiId && byId[hiId] && placementOf(byId[hiId]), pl = hasSlot(pl0) ? pl0 : null;
   Object.entries(towerHall.panels).forEach(([k, pn]) => {
     const old = pn.mesh.material[4].map;
@@ -3618,7 +3620,7 @@ function openTowerPick() {
 (() => {
   const tp = document.getElementById('towerPick');
   tp.querySelector('.x').onclick = () => tp.classList.remove('on');
-  tp.querySelector('.ov').onclick = () => { tp.classList.remove('on'); if (towerHall) { setGen(0); flyTo(towerView(null), 1.6); } };
+  tp.querySelector('.ov').onclick = () => { tp.classList.remove('on'); if (towerHall) { setGen(0); const v = towerView(null); flyTo._keep = 1; flyTo(v, 1.6); flyTo._keep = 0; } };
   document.querySelector('#twBox .x').onclick = closeTowerVisit;
   document.querySelector('#twBox .bk').onclick = () => { document.getElementById('twBox').classList.remove('on'); document.body.classList.remove('tower'); openTowerPick(); };
 })();
@@ -3905,6 +3907,7 @@ function genView(g) {
 let flight = null;
 const ease = k => k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
 function flyTo([pos, tgt], dur = 1.2) {
+  if (!flyTo._keep) document.body.classList.remove('sidehall');
   if (flight) flight.res();
   return new Promise(res => {
     flight = { p0: camera.position.clone(), t0: controls.target.clone(), p1: pos, t1: tgt, start: performance.now(), dur: dur * 1000, res };
