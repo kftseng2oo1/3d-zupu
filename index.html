@@ -268,6 +268,8 @@
   #veil.on{opacity:1}
   #pilCap{position:fixed;left:50%;bottom:calc(var(--sb) + 28px);transform:translateX(-50%);z-index:13;display:none;align-items:center;gap:10px;background:rgba(30,16,6,.82);border:1px solid var(--gold);border-radius:24px;padding:8px 8px 8px 16px;color:#f6d98a;font-weight:900;font-size:calc(15px * var(--fs));letter-spacing:.06em;white-space:nowrap}
   #pilCap.on{display:flex;animation:fadeIn .3s}
+  #bowCap{position:fixed;left:50%;bottom:calc(var(--sb) + 28px);transform:translateX(-50%);z-index:13;display:none;background:rgba(30,16,6,.82);border:1px solid var(--gold);border-radius:24px;padding:8px 18px;color:#f6d98a;font-weight:900;font-size:calc(15px * var(--fs));letter-spacing:.12em;white-space:nowrap;pointer-events:none}
+  #bowCap.on{display:block;animation:fadeIn .3s}
   #pilCap .skip{border:0;border-radius:16px;background:#f6d98a;color:#4a0e0e;font-family:var(--font);font-weight:900;font-size:calc(13px * var(--fs));padding:5px 12px}
   body.dizang #bar,body.pil #bar{display:none}
   #charBox,#pilBox{position:fixed;left:0;right:0;bottom:0;z-index:14;display:none;padding:0 8px}
@@ -484,6 +486,7 @@
   </div>
 </div>
 <div id="veil"></div>
+<div id="bowCap"></div>
 <div id="pilCap"><span></span><button class="skip">略過 ›</button></div>
 <div id="charBox">
   <div class="sheet">
@@ -1939,9 +1942,28 @@ async function makeOfferings(types, pid) {
   } else saveLocal();
   toast(`${who || '族人'} 為 ${name} ${types.map(t => OFFER[t].verb).join('、')}`);
   closeCard();
-  if (HS[pid]) flyTo(dzView('altar'), 1.2);
-  else if (every) { setGen(0); flyTo(overviewView(), 1.4); }
-  else { setGen(p ? p.gen : 1); flyTo(p && p !== root ? personAltarView(p) : altarView(), 1.2); }
+  let fly;
+  if (HS[pid]) fly = flyTo(dzView('altar'), 1.2);
+  else if (every) { setGen(0); fly = flyTo(overviewView(), 1.4); }
+  else { setGen(p ? p.gen : 1); fly = flyTo(p && p !== root ? personAltarView(p) : altarView(), 1.2); }
+  if (types.includes('incense') && !every) { await fly; await bowThree(); }
+}
+/* ---------- 上香三拜：鏡頭隨拜低頭三次 ---------- */
+let bowing = false;
+async function bowThree() {
+  if (bowing) return; bowing = true;
+  const cap = document.getElementById('bowCap');
+  const pos = camera.position.clone(), tgt = controls.target.clone(), d = pos.distanceTo(tgt);
+  const dipPos = pos.clone().add(V(0, -d * .07, 0)), dipTgt = tgt.clone().add(V(0, -d * .28, 0));
+  controls.enabled = false;
+  for (let n = 0; n < 3; n++) {
+    cap.textContent = `上香・${'一二三'[n]}拜`; cap.classList.add('on');
+    await flyTo([dipPos, dipTgt], .7);
+    await new Promise(r => setTimeout(r, 250));
+    await flyTo([pos, tgt], .65);
+    await new Promise(r => setTimeout(r, 200));
+  }
+  cap.classList.remove('on'); controls.enabled = true; bowing = false;
 }
 const offerIncense = pid => makeOfferings(['incense'], pid);
 function altarView() {
