@@ -1,13 +1,20 @@
 // 曾氏族譜 3D 祠堂 Service Worker
-const CACHE = '3d-zupu-v32';
+// 每次發佈新版請把 CACHE 版號 +1；App 會偵測到新版並提示「軟體更新」
+const CACHE = '3d-zupu-v33';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
+  // 略過瀏覽器 HTTP 快取，確保新版檔案是剛從伺服器取得；不自動接手，等使用者按「立即更新」
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS.map(u => new Request(u, { cache: 'reload' })))));
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys().then(ks => Promise.all(ks.filter(k => k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim()));
+});
+self.addEventListener('message', e => {
+  const t = e.data && e.data.type;
+  if (t === 'SKIP_WAITING') self.skipWaiting();
+  else if (t === 'VERSION' && e.ports[0]) e.ports[0].postMessage(CACHE);
 });
 self.addEventListener('fetch', e => {
   const req = e.request;

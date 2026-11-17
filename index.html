@@ -111,6 +111,14 @@
   @keyframes glow{50%{box-shadow:0 0 30px rgba(255,200,90,.9)}}
   #riteBanner b{display:block;color:#f6d98a;font-size:min(calc(15px * var(--fs)),4.3vw);letter-spacing:.08em;white-space:nowrap}
   #riteBanner span{display:block;color:#f3e3b8;font-size:min(calc(12px * var(--fs)),3.5vw);margin-top:2px;white-space:nowrap}
+  #updBar{position:fixed;left:50%;top:calc(var(--st) + 10px);transform:translateX(-50%);z-index:60;display:none;align-items:center;gap:8px;max-width:calc(100vw - 16px);background:rgba(30,16,6,.94);border:1px solid var(--gold);border-radius:26px;padding:6px 6px 6px 16px;box-shadow:0 4px 18px rgba(0,0,0,.4)}
+  #updBar.on{display:flex;animation:fadeIn .35s}
+  #updBar span{display:flex;flex-direction:column;line-height:1.25;white-space:nowrap}
+  #updBar b{color:#f6d98a;font-size:calc(14px * var(--fs));letter-spacing:.1em}
+  #updBar small{color:#e8d6aa;font-size:calc(11px * var(--fs))}
+  #updBar button{border:1px solid var(--gold);border-radius:20px;font-family:var(--font);font-weight:900;font-size:calc(13.5px * var(--fs));padding:7px 13px;white-space:nowrap}
+  #updBar .go{background:linear-gradient(#b42424,#7a1414);color:#f6d98a}
+  #updBar .later{background:transparent;color:#d8c69a;border-color:transparent}
   #toast{position:fixed;left:50%;top:calc(var(--st) + 128px);transform:translate(-50%,-10px);z-index:40;opacity:0;pointer-events:none;transition:all .3s;
     background:rgba(42,26,8,.92);color:var(--gold-l);border:1px solid var(--gold);padding:9px 16px;border-radius:3px;font-size:calc(14px * var(--fs));max-width:88vw;text-align:center}
   #toast.on{opacity:1;transform:translate(-50%,0)}
@@ -448,6 +456,7 @@
 
 <div id="riteBanner"></div>
 <div id="toast"></div>
+<div id="updBar"><span><b>軟體更新</b><small>有新版本可用</small></span><button class="go">立即更新</button><button class="later">稍後</button></div>
 <div id="askBox" class="dlg"><div class="in"><h4></h4><input maxlength="20"><div class="row"><button class="no">取消</button><button class="ok">確定</button></div></div></div>
 <div id="offerBox" class="dlg"><div class="in">
   <h4></h4>
@@ -3503,14 +3512,25 @@ function cxBoatStand(brass, w) {   // 蓮花供台（兩端上翹）
     g.strokeStyle = '#6a4a18'; g.lineWidth = 3; for (let i = 0; i < 8; i++) { g.beginPath(); g.arc(40 + i * 18, H / 2, 10, 0, Math.PI * 1.5); g.stroke(); g.beginPath(); g.arc(W - 40 - i * 18, H / 2, 10, 0, Math.PI * 1.5); g.stroke(); }
   });
   const face = new THREE.MeshStandardMaterial({ map: lotusTex, metalness: .6, roughness: .38 });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(w, .09, .13), [brass, brass, brass, brass, face, brass]); body.position.y = .2; G.add(body);
+  // 茶台：平盤承三杯茶，前緣立蓮花浮雕擋板，兩端捲軸上翹，下有雲紋座（嵌紅寶石）、獸足
+  const tray = new THREE.Mesh(new THREE.BoxGeometry(w + .04, .025, .22), brass); tray.position.y = .165; G.add(tray);
+  const panel = new THREE.Mesh(new THREE.BoxGeometry(w, .055, .022), [brass, brass, brass, brass, face, brass]); panel.position.set(0, .19, .1); panel.rotation.x = -.18; G.add(panel);
   [-1, 1].forEach(sx => {
-    const end = new THREE.Mesh(new THREE.BoxGeometry(.16, .025, .15), brass); end.position.set(sx * (w / 2 + .05), .26, 0); end.rotation.z = sx * .45; G.add(end);
-    const scroll = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .15, 10), brass); scroll.rotation.x = Math.PI / 2; scroll.position.set(sx * (w / 2 + .12), .3, 0); G.add(scroll);
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(.06, .12, .1), brass); leg.position.set(sx * w * .3, .06, 0); G.add(leg);
+    const end = new THREE.Mesh(new THREE.BoxGeometry(.16, .022, .22), brass); end.position.set(sx * (w / 2 + .07), .2, 0); end.rotation.z = sx * .45; G.add(end);
+    const scroll = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .22, 10), brass); scroll.rotation.x = Math.PI / 2; scroll.position.set(sx * (w / 2 + .14), .245, 0); G.add(scroll);
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(.06, .1, .12), brass); leg.position.set(sx * w * .34, .05, .02); G.add(leg);
   });
-  const base = new THREE.Mesh(new THREE.BoxGeometry(w * .62, .1, .12), [brass, brass, brass, brass, face, brass]); base.position.y = .1; G.add(base);
-  const gem = new THREE.Mesh(new THREE.SphereGeometry(.014, 8, 6), rtMat('#c8282a', .3)); gem.position.set(0, .1, .062); G.add(gem);
+  const base = new THREE.Mesh(new THREE.BoxGeometry(w * .78, .1, .14), [brass, brass, brass, brass, face, brass]); base.position.set(0, .1, .02); G.add(base);
+  const gem = new THREE.Mesh(new THREE.SphereGeometry(.014, 8, 6), rtMat('#c8282a', .3)); gem.position.set(0, .1, .092); G.add(gem);
+  // 三杯茶：高腳銅杯（杯身浮雕），杯中琥珀色茶湯
+  const cup = lathe([[0, 0], [.022, 0], [.024, .008], [.012, .016], [.012, .026], [.03, .036], [.034, .078], [.031, .079], [.028, .04], [0, .036]], brass, 20);
+  const teaM = new THREE.MeshStandardMaterial({ color: '#b8782a', roughness: .05, metalness: .1, transparent: true, opacity: .92 });
+  const relief = new THREE.MeshStandardMaterial({ color: '#7a6232', metalness: .6, roughness: .5 });
+  [-1, 0, 1].forEach(k => {
+    const c = cup.clone(); c.scale.setScalar(1.35); c.position.set(k * w * .28, .1775, -.035); G.add(c);
+    const tea = new THREE.Mesh(new THREE.CircleGeometry(.039, 16), teaM); tea.rotation.x = -Math.PI / 2; tea.position.set(c.position.x, .1775 + .092, -.035); G.add(tea);
+    const r = new THREE.Mesh(new THREE.SphereGeometry(.014, 8, 6), relief); r.scale.set(1.75, 1.1, .4); r.position.set(c.position.x, .1775 + .075, -.035 + .044); G.add(r);
+  });
   return G;
 }
 
@@ -3626,10 +3646,8 @@ function buildChuxi() {
   });
   // 兩座香爐＋三杯＋蓮花供台
   const censers = [cxCenser(D, brass, -1.02, TY, -2.27, .78, true), cxCenser(D, brass, 0, TY, -2.28, 1.02, false)];
-  const cupG = lathe([[0, 0], [.025, 0], [.03, .015], [.034, .06], [.03, .062], [0, .02]], brass, 16);
   censers.forEach(cs => {
-    [-.13, 0, .13].forEach(dx => { const c2 = cupG.clone(); c2.position.set(cs.position.x + dx * cs.scale.x * 1.3, TY, -2.02); D.add(c2); const tea = new THREE.Mesh(new THREE.CircleGeometry(.027, 12), om.tea); tea.rotation.x = -Math.PI / 2; tea.position.set(c2.position.x, TY + .05, -2.02); D.add(tea); });
-    const bs = cxBoatStand(brass, cs.scale.x * .62); bs.position.set(cs.position.x, TY, -1.86); D.add(bs);
+    const bs = cxBoatStand(brass, cs.scale.x * .62); bs.position.set(cs.position.x, TY, -1.92); D.add(bs);
   });
   D.updateMatrixWorld(true);
   H.censers = censers;
@@ -4618,6 +4636,7 @@ function buildBar() {
   mk('字輩', () => { stopTour(); closeCard(); openZibei(0); });
   mk('攝影', enterPhoto);
   mk('紀念堂', () => { location.href = '/zupu/index.html'; });
+  mk('更新', checkUpdate);
   // 底列放不下時：右側淡出＋「›」提示，點了往右捲；第一次開啟時輕推一下讓人知道可以滑
   const more = document.getElementById('barMore');
   const upd = () => { const over = bar.scrollWidth - bar.clientWidth - bar.scrollLeft > 8; bar.classList.toggle('more', over); more.classList.toggle('on', over && getComputedStyle(bar).display !== 'none'); };
@@ -5038,7 +5057,62 @@ async function start() {
 start();
 
 // PWA：離線快取
-if ('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+/* ================= 軟體更新 =================
+   新版 sw.js（CACHE 版號 +1）裝好後先待命，不打斷使用中的畫面；跳出「軟體更新」提示，按「立即更新」才切換並重新載入。
+   開啟 App、回到前景、每 30 分鐘自動檢查；底列「更新」可手動檢查並顯示目前版本。 */
+const UPD = { reg: null, want: false };
+function updShow(ver) {
+  const el = document.getElementById('updBar');
+  el.querySelector('small').textContent = ver ? `新版本 ${ver.replace(/^.*-v/, 'v')} 可用` : '有新版本可用';
+  el.classList.add('on');
+}
+function swVersion(sw) {
+  return new Promise(res => {
+    if (!sw) return res('');
+    const ch = new MessageChannel(), t = setTimeout(() => res(''), 1500);
+    ch.port1.onmessage = e => { clearTimeout(t); res(String(e.data || '')); };
+    try { sw.postMessage({ type: 'VERSION' }, [ch.port2]); } catch (e) { clearTimeout(t); res(''); }
+  });
+}
+async function updWaiting() { const w = UPD.reg && UPD.reg.waiting; if (w && navigator.serviceWorker.controller) updShow(await swVersion(w)); }
+function updWatch(reg) {
+  UPD.reg = reg; updWaiting();
+  reg.addEventListener('updatefound', () => {
+    const nw = reg.installing; if (!nw) return;
+    nw.addEventListener('statechange', () => { if (nw.state === 'installed') updWaiting(); });
+  });
+}
+function applyUpdate() {
+  if (CX.busy || bdBusy || bowing) { toast('祭祀進行中，完成後再更新'); return; }
+  document.getElementById('updBar').classList.remove('on');
+  const w = UPD.reg && UPD.reg.waiting;
+  toast('更新中…');
+  if (!w) { location.reload(); return; }
+  UPD.want = true; w.postMessage({ type: 'SKIP_WAITING' });
+  setTimeout(() => location.reload(), 4000);   // 保險：萬一沒收到 controllerchange
+}
+async function checkUpdate() {
+  if (!('serviceWorker' in navigator) || !UPD.reg) { toast('重新載入以取得最新版本…'); setTimeout(() => location.reload(), 800); return; }
+  const cur = (await swVersion(navigator.serviceWorker.controller)).replace(/^.*-v/, 'v');
+  toast('檢查更新中…');
+  try { await UPD.reg.update(); } catch (e) { toast('無法連線，請稍後再試'); return; }
+  for (let i = 0; i < 20 && UPD.reg.installing; i++) await sleep(400);   // 等新版下載安裝完
+  if (UPD.reg.waiting) { await updWaiting(); toast('發現新版本，按「立即更新」'); }
+  else toast(`已是最新版本${cur ? `（${cur}）` : ''}`);
+}
+(() => {
+  const el = document.getElementById('updBar');
+  el.querySelector('.go').onclick = applyUpdate;
+  el.querySelector('.later').onclick = () => el.classList.remove('on');
+})();
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.addEventListener('controllerchange', () => { if (UPD.want) { UPD.want = false; location.reload(); } });
+  addEventListener('load', () => navigator.serviceWorker.register('./sw.js').then(reg => {
+    updWatch(reg);
+    setInterval(() => reg.update().catch(() => {}), 30 * 60e3);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') reg.update().catch(() => {}); });
+  }).catch(() => {}));
+}
 </script>
 </body>
 </html>
