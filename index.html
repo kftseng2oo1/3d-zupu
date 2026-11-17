@@ -316,10 +316,32 @@
   #dzBox .ofr{background:#8b1a1a;color:#f6d98a}
   #dzBox .chn{background:#2a1a08;color:#f6d98a}
   #dzBox .see{background:#fbf4e2;color:#5a0d0d}
+  /* 除夕祭祖 */
+  #cxBox{position:fixed;left:0;right:0;bottom:0;z-index:12;display:none;padding:0 8px}
+  #cxBox.on{display:block;animation:fadeIn .35s}
+  #cxBox .sheet{position:relative;background:linear-gradient(170deg,#fbefe0,#f0d6b0);border:2px solid var(--gold);border-bottom:0;border-radius:6px 6px 0 0;box-shadow:0 -6px 24px rgba(0,0,0,.35);padding:12px 14px calc(var(--sb) + 12px)}
+  #cxBox h3{color:var(--red);font-size:calc(19px * var(--fs));font-weight:900;letter-spacing:.3em;text-align:center}
+  #cxBox .sub{text-align:center;color:#8a5a16;font-size:calc(12.5px * var(--fs));letter-spacing:.06em;margin:2px 0 8px}
+  #cxBox .x{position:absolute;top:4px;right:8px;border:0;background:none;color:#7a5a2a;font-size:26px;padding:4px 8px}
+  #cxBox .steps{list-style:none;display:flex;gap:4px;margin:0 0 8px;counter-reset:s}
+  #cxBox .steps li{flex:1;text-align:center;font-size:calc(11.5px * var(--fs));font-weight:700;color:#9a7a4a;border-bottom:3px solid #e2cfa2;padding:2px 0 4px;counter-increment:s}
+  #cxBox .steps li::before{content:counter(s,cjk-ideographic) '、'}
+  #cxBox .steps li.on{color:#8b1a1a;border-color:#8b1a1a}
+  #cxBox .steps li.done{color:#3a7a3a;border-color:#7ab07a}
+  #cxBox .go{width:100%;min-height:calc(48px * var(--fs));margin-bottom:8px;border:1px solid var(--gold);border-radius:3px;background:linear-gradient(#b42424,#7a1414);color:#f6d98a;font-family:var(--font);font-weight:900;font-size:calc(17px * var(--fs));letter-spacing:.3em}
+  #cxBox .go:disabled{opacity:.6}
+  #cxBox .row{display:flex;gap:8px;margin-bottom:8px}
+  #cxBox .row button{flex:1;min-height:calc(42px * var(--fs));font-family:var(--font);font-size:calc(14.5px * var(--fs));font-weight:900;border-radius:3px;border:1px solid var(--gold);letter-spacing:.06em;background:#fbf4e2;color:#5a0d0d}
+  #cxBox .ofr{background:#8b1a1a!important;color:#f6d98a!important}
+  #cxBox .bd{background:linear-gradient(#c9952e,#9a6a12)!important;color:#fff8e0!important}
+  #cxBox .chn{background:#2a1a08!important;color:#f6d98a!important}
   /* 手機橫放：殿內面板移到右側、縮小，左邊留給 3D 畫面 */
   @media (orientation:landscape) and (max-height:520px){
-    #dzBox,#pilBox,#charBox{left:auto;right:0;width:min(50vw,520px)}
-    #dzBox .sheet,#pilBox .sheet,#charBox .sheet{max-height:94vh;overflow:auto;padding-top:8px}
+    #dzBox,#pilBox,#charBox,#cxBox{left:auto;right:0;width:min(50vw,520px)}
+    #dzBox .sheet,#pilBox .sheet,#charBox .sheet,#cxBox .sheet{max-height:94vh;overflow:auto;padding-top:8px}
+    #cxBox .sub{display:none}
+    #cxBox .row{margin-bottom:5px}
+    #cxBox .row button,#cxBox .go{min-height:calc(32px * var(--fs))}
     #dzBox .sub{display:none}
     #dzBox .row{margin-bottom:5px}
     #dzBox .row button,#dzBox .bk{min-height:calc(32px * var(--fs))}
@@ -535,6 +557,18 @@
   </div>
 </div>
 
+<div id="cxBox">
+  <div class="sheet">
+    <button class="x" aria-label="離開">×</button>
+    <h3>除夕祭祖</h3>
+    <p class="sub"></p>
+    <ol class="steps"><li>擺供品</li><li>鐘鼓祈福</li><li>上香三拜</li><li>祈福圓滿</li></ol>
+    <button class="go">開始祭祖</button>
+    <div class="row"><button class="ofr">擺供品</button><button class="bd">鐘鼓齊鳴</button><button class="chn">誦《心經》</button></div>
+    <div class="row"><button class="see">看供品</button><button class="alt">瞻仰神龕</button></div>
+  </div>
+</div>
+
 <div id="scrollReader">
   <div class="rodr"></div>
   <div class="body"></div>
@@ -724,7 +758,7 @@ measure(root); place(root, -root.w / 2);
 /* ---------- 字型就緒後才畫牌位文字（iOS 必要） ---------- */
 async function waitFonts() {
   const txt = PEOPLE.concat(typeof memExtras === 'function' ? memExtras() : []).map(p => p.name + p.tabletText + (p.tag || '') + (p.lines || []).join('') + (p.bio || '') + (p.alias || '')).join('')
-            + '噴水池烏龜開啟關閉大中小全看回掃墓路線' + '口湖鄉成龍納骨塔眾靈祠新舊號樓・一二三四五六七八九十' + '眾志成城寶塔莊嚴為報本靈魂奉厝禪堂肅穆慎追終' + '眾靈祠男公女媽廟恭奉庇佑鄉里闡草萊保國家功不泯守貞堅護土德長昭雲線沿魚塭而行正殿轉' + '闔家平安祖先安息身體健康事業順利學業進步消災解厄' + '成龍納骨塔一樓地藏殿南無大願地藏王菩薩香案供奉誦心經瞻仰聖像回掃墓路線進入祭拜於前迴向法界眾生' + '掃墓路線口湖鄉成龍納骨堂眾靈祠男公女媽廟起點終點沿途安奉位新舊塔往南接台旁道路轉雲往東北開車約分鐘全圖導覽停止地圖導航抵達紀念堂尚未登記此處溼地村牛挑灣溪烏麻園豐樺水產行縣' + '依族譜資料整理可於紀念堂補寫生平祖先名冊' + '祠堂全景香案燭火清香奉茶供果餅乾鮮花來台祖神位三省堂匾額家族沿革碑攝影離開自動掃描停止繼續拍攝下載' + SUTRA.title + SUTRA.open + SUTRA.body + SUTRA.close + '念經超渡誦心卷語音木魚慢中快開始暫停繼續再一次圓滿功德迴向偈為' + HALL.plaque + HALL.plaqueSub + HALL.couplet.join('') + HALL.zibei + '龍山字輩大宗曾氏沿革輕觸展讀塔位側殿樓號口湖鄉成龍納骨塔蚵寮新舊' + historyText().split('\n').filter(s => /^[一二三四五六七八九十]+、/.test(s)).join('') + '第一二三四五六七八九十世配偶︵︶無—年生仙逝之本支在世農曆卒生平待補於紀念堂祖先名冊填寫字號0123456789.';
+            + '噴水池烏龜開啟關閉大中小全看回掃墓路線' + '口湖鄉成龍納骨塔眾靈祠新舊號樓・一二三四五六七八九十' + '眾志成城寶塔莊嚴為報本靈魂奉厝禪堂肅穆慎追終' + '眾靈祠男公女媽廟恭奉庇佑鄉里闡草萊保國家功不泯守貞堅護土德長昭雲線沿魚塭而行正殿轉' + '闔家平安祖先安息身體健康事業順利學業進步消災解厄' + '成龍納骨塔一樓地藏殿南無大願地藏王菩薩香案供奉誦心經瞻仰聖像回掃墓路線進入祭拜於前迴向法界眾生' + '掃墓路線口湖鄉成龍納骨堂眾靈祠男公女媽廟起點終點沿途安奉位新舊塔往南接台旁道路轉雲往東北開車約分鐘全圖導覽停止地圖導航抵達紀念堂尚未登記此處溼地村牛挑灣溪烏麻園豐樺水產行縣' + '依族譜資料整理可於紀念堂補寫生平祖先名冊' + '祠堂全景香案燭火清香奉茶供果餅乾鮮花來台祖神位三省堂匾額家族沿革碑攝影離開自動掃描停止繼續拍攝下載' + SUTRA.title + SUTRA.open + SUTRA.body + SUTRA.close + '念經超渡誦心卷語音木魚慢中快開始暫停繼續再一次圓滿功德迴向偈為' + HALL.plaque + HALL.plaqueSub + HALL.couplet.join('') + HALL.zibei + '龍山字輩大宗曾氏沿革輕觸展讀塔位側殿樓號口湖鄉成龍納骨塔蚵寮新舊' + historyText().split('\n').filter(s => /^[一二三四五六七八九十]+、/.test(s)).join('') + CX_TXT + '第一二三四五六七八九十世配偶︵︶無—年生仙逝之本支在世農曆卒生平待補於紀念堂祖先名冊填寫字號0123456789.';
   try {
     await Promise.race([
       Promise.all([
@@ -1856,8 +1890,11 @@ function computeAnniv() {
 function nextSolarDate(days) { const d = twDay(days).date; return `${d.getUTCMonth() + 1}/${d.getUTCDate()}`; }
 function showRiteBanner() {
   const el = document.getElementById('riteBanner');
-  const today = ANNIV.filter(a => a.days === 0), soon = ANNIV.find(a => a.days > 0 && a.days <= 7);
-  if (today.length) {
+  const today = ANNIV.filter(a => a.days === 0), soon = ANNIV.find(a => a.days > 0 && a.days <= 7), cxN = cxDaysTo();
+  if (cxN === 0 && !today.length) {
+    el.innerHTML = '<b>今日除夕・闔家圍爐</b><span>輕觸前往神明廳祭祖</span>';
+    el.onclick = openChuxi;
+  } else if (today.length) {
     el.innerHTML = `<b>今日是 ${today.map(a => escH(a.p.name)).join('、')} 忌日</b><span>${escH(annivLabel(today[0].p))}・輕觸前往上香</span>`;
     el.onclick = () => selectPerson(today[0].p.id);
   } else if (soon) {
@@ -2138,11 +2175,13 @@ function openRitePanel() {
     <button class="rbtn" data-act="all">前往香案供奉</button>
     <button class="rbtn revery">所有祖先都擺香案</button>
     <button class="rbtn rchant">念經超渡・誦《心經》</button>
+    <button class="rbtn rcx">除夕祭祖・神明廳</button>
     <h3>近期忌日</h3>${ann.length ? ann.map(a => `<div class="rrow" data-pid="${a.p.id}"><b>${escH(a.p.name)}</b><span>${escH(annivLabel(a.p))}</span><em class="${a.days === 0 ? 'hot' : ''}">${a.days === 0 ? '今日' : nextSolarDate(a.days) + '・' + a.days + ' 天後'}</em></div>`).join('') : '<p>六十天內沒有忌日。忌日請在紀念堂「祖先名冊」填寫。</p>'}
     <h3>祭祀紀錄</h3>${(st.recent || []).length ? st.recent.slice(0, 20).map(r => `<div class="rrow" data-pid="${r.pid}"><b>${escH(r.who)}</b><span>為 ${escH(r.name)} ${(r.types || [r.type || 'incense']).map(t => (OFFER[t] || OFFER.incense).verb + (t === 'sutra' && r.n ? ` ${r.n} 卷` : '')).join('、')}</span><em>${fmtT(r.at)}</em></div>`).join('') : '<p>還沒有祭祀紀錄。</p>'}
     <p class="rnote">${RITE.online ? '紀錄已與家人同步。' : '目前為本機模式：紀錄只存在這台裝置（雲端路由尚未部署）。'}</p>`;
   el.querySelector('.revery').onclick = () => { el.classList.remove('on'); setGen(0); flyTo(overviewView(), 1.2); openOfferSheet('every'); };
   el.querySelector('.rchant').onclick = () => { el.classList.remove('on'); openSutra('all'); };
+  el.querySelector('.rcx').onclick = () => { el.classList.remove('on'); openChuxi(); };
   el.querySelector('.rbtn').onclick = () => { el.classList.remove('on'); setGen(1); flyTo(altarView(), 1.2); openOfferSheet('all'); };
   el.querySelectorAll('.rrow[data-pid]').forEach(r => r.onclick = () => { if (byId[r.dataset.pid]) { el.classList.remove('on'); selectPerson(r.dataset.pid); } });
   el.classList.add('on'); el.querySelector('.body').scrollTop = 0;
@@ -2894,6 +2933,7 @@ function buildDizang() {
 }
 const dzW = (x, y, z) => DZ.origin.clone().add(new THREE.Vector3(x, y, z));
 function dzView(kind) {   // 下方有面板：主體放在畫面上半
+  if (HK === 'chuxi') return cxView(kind === 'statue' ? 'shrine' : kind);
   if (kind === 'altar') return [dzW(.5, 2.9, 4.6), dzW(0, 1.05, -.5)];
   if (kind === 'statue') return [dzW(.3, 2.4, 2.4), dzW(.1, 1.75, -2.2)];
   return [dzW(0, 2.6, 8), dzW(0, 1.5, -1.5)];   // 入殿
@@ -3188,7 +3228,7 @@ let bdBusy = false;
 async function ringCeremony(standalone) {
   const H = HS[HK]; if (!H || !H.bell || bdBusy) return;
   bdBusy = true; bdAC();
-  const box = document.getElementById('dzBox'); if (standalone) box.classList.remove('on');
+  const box = document.getElementById(HK === 'chuxi' ? 'cxBox' : 'dzBox'); if (standalone) box.classList.remove('on');
   const cap = document.getElementById('bowCap'); cap.textContent = '鐘鼓齊鳴'; cap.classList.add('on');
   controls.enabled = false;
   // 依螢幕寬窄退後，讓鐘、鼓與神龕同時入鏡
@@ -3200,10 +3240,10 @@ async function ringCeremony(standalone) {
   [7000, 8600, 10200].forEach(ms => setTimeout(() => { sd(.85); sb(.4); }, ms));   // 最後鐘鼓同響三下
   await new Promise(r => setTimeout(r, 11800));
   cap.classList.remove('on'); controls.enabled = true; bdBusy = false;
-  if (standalone) { box.classList.add('on'); flyTo(dzView('enter'), 1.4); }
+  if (standalone) { box.classList.add('on'); flyTo(HK === 'chuxi' ? cxView('enter') : dzView('enter'), 1.4); }
 }
 function tickBellDrum(dt) {
-  ['dizang', 'zhongling'].forEach(k => {
+  Object.keys(HS).forEach(k => {
     const H = HS[k]; if (!H || !H.bell) return;
     const B = H.bell, Dr = H.drum;
     if (B.t < 6) {   // 撞木後拉再撞上，鐘身微晃
@@ -3222,6 +3262,557 @@ function tickBellDrum(dt) {
     }
   });
 }
+
+/* ================= 除夕祭祖：家中神明廳（依家中神龕照片） =================
+   頂桌：觀音彩繪背板、紅底金字聯（祖宗長佑子孫賢／佛力永扶家門盛）、外柱黑底金字、雕花頂框與紅燈、
+         左側玻璃龕「曾氏歷代祖考妣之神位」、中央雕花佛龕金身觀音、右側鹽燈、
+         兩座銅香爐（祖先爐、佛爐）各三杯與蓮花供台、水晶蓮花燈、蝴蝶蘭。
+   下桌：鮮花一對、素果三盤（蘋果・橘子・鳳梨）、糖果五盤、飲料、三牲（雞・豬肉・魚）、發粿插春。
+   儀式：擺供品 → 上供祈福（鐘鼓齊鳴）→ 上香三拜 → 祈福圓滿（記入祭祀紀錄：歷代祖先）。 */
+const CX_TXT = '曾氏歷代祖考妣之神位百代孝慈高仰止千年支派永長流陽上子孫奉祀佛光普照祖宗長佑子孫賢佛力永扶家門盛寶鼎呈祥香結彩銀台吐艷燭生輝春福汽水果汁烏龍茶米酒除夕祭祖擺供品上供祈福鐘鼓齊鳴上香三拜圓滿鮮花一對素果三盤蘋果橘子鳳梨糖果五盤飲料三牲雞豬肉魚發粿插年年看瞻仰神龕誦心經開始距離還有天今日闔家圍爐敬祀團圓庇佑新如意歲平安點告恭請歷代祖先';
+HS.chuxi = { built: false };
+const CX = { busy: false, groups: {}, pop: [], step: -1 };
+const CX_STEPS = [
+  ['flower', '鮮花一對'], ['fruit', '素果三盤・蘋果 橘子 鳳梨'], ['candy', '糖果五盤'],
+  ['drink', '飲料・汽水 果汁 烏龍茶 米酒'], ['sanxing', '三牲・雞 豬肉 魚'], ['chun', '發粿插春・年年發'],
+];
+const CX_WISHES = ['闔家團圓', '祖先庇佑', '新年如意', '歲歲平安'];
+
+function cxPainting() {   // 白衣觀音：持楊柳枝、蓮花、海浪、飛鳥
+  const W = 640, H = 1000, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f4eedf'; g.fillRect(0, 0, W, H);
+  g.fillStyle = '#d6e8f4'; g.fillRect(0, 790, W, H - 790);
+  for (let r = 0; r < 9; r++) {   // 海浪
+    const y = 800 + r * 24; g.strokeStyle = r % 2 ? '#5f9ad0' : '#93c0e6'; g.lineWidth = 5; g.beginPath();
+    for (let x = -60 + (r % 2) * 30; x < W + 60; x += 60) { g.moveTo(x, y); g.quadraticCurveTo(x + 15, y - 16, x + 30, y); g.quadraticCurveTo(x + 45, y + 10, x + 60, y); }
+    g.stroke();
+  }
+  const leaf = (x, y, r, a) => {
+    g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = '#4f8a62'; g.beginPath(); g.ellipse(0, 0, r, r * .55, 0, 0, 7); g.fill();
+    g.strokeStyle = '#2f5e40'; g.lineWidth = 2; for (let k = 0; k < 9; k++) { g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(k * .7) * r * .95, Math.sin(k * .7) * r * .5); g.stroke(); } g.restore();
+  };
+  const lotus = (x, y, s) => {
+    for (let k = -3; k <= 3; k++) { g.save(); g.translate(x, y); g.rotate(k * .32); g.fillStyle = k % 2 ? '#f6b6c4' : '#ee8fa6'; g.beginPath(); g.ellipse(0, -26 * s, 12 * s, 30 * s, 0, 0, 7); g.fill(); g.restore(); }
+    g.fillStyle = '#f2c94c'; g.beginPath(); g.ellipse(x, y - 6 * s, 10 * s, 5 * s, 0, 0, 7); g.fill();
+  };
+  [[90, 560, 80, -.3], [560, 520, 76, .4], [70, 740, 70, .2], [580, 720, 74, -.2], [150, 660, 50, .8], [500, 640, 52, -.7]].forEach(a => leaf(...a));
+  [[110, 470, 1.2], [540, 440, 1.1], [60, 660, 1], [600, 620, .9], [470, 760, .8], [170, 770, .8]].forEach(a => lotus(...a));
+  const cx = W / 2;
+  g.strokeStyle = '#d9b45a'; g.lineWidth = 4; g.beginPath(); g.arc(cx, 250, 150, 0, 7); g.stroke();   // 圓光
+  g.fillStyle = 'rgba(255,240,200,.45)'; g.beginPath(); g.arc(cx, 250, 148, 0, 7); g.fill();
+  // 白衣（頭紗披至腳）
+  g.fillStyle = '#fbfaf5'; g.strokeStyle = '#b8b2a4'; g.lineWidth = 3;
+  g.beginPath(); g.moveTo(cx, 150); g.bezierCurveTo(cx - 90, 160, cx - 100, 260, cx - 120, 360); g.bezierCurveTo(cx - 170, 560, cx - 190, 760, cx - 200, 880);
+  g.lineTo(cx + 200, 880); g.bezierCurveTo(cx + 190, 760, cx + 170, 560, cx + 120, 360); g.bezierCurveTo(cx + 100, 260, cx + 90, 160, cx, 150); g.fill(); g.stroke();
+  g.strokeStyle = 'rgba(150,140,120,.45)'; g.lineWidth = 2;
+  for (let i = 0; i < 9; i++) { g.beginPath(); g.moveTo(cx - 80 + i * 20, 420); g.quadraticCurveTo(cx - 100 + i * 25, 650, cx - 150 + i * 38, 870); g.stroke(); }   // 衣褶
+  g.fillStyle = '#7fb6de'; g.fillRect(cx - 70, 470, 140, 40);   // 內衣藍帶
+  g.fillStyle = '#d9b45a'; g.fillRect(cx - 70, 466, 140, 6);
+  // 臉、髮、冠
+  g.fillStyle = '#1e1a18'; g.beginPath(); g.ellipse(cx, 228, 58, 50, 0, Math.PI, 0); g.fill();
+  g.fillStyle = '#f5dfc8'; g.beginPath(); g.ellipse(cx, 255, 50, 62, 0, 0, 7); g.fill();
+  g.strokeStyle = '#3a2412'; g.lineWidth = 3;
+  [-1, 1].forEach(s => { g.beginPath(); g.moveTo(cx + s * 10, 236); g.quadraticCurveTo(cx + s * 26, 228, cx + s * 40, 238); g.stroke(); g.beginPath(); g.moveTo(cx + s * 12, 252); g.quadraticCurveTo(cx + s * 26, 258, cx + s * 38, 250); g.stroke(); });
+  g.fillStyle = '#c0403a'; g.beginPath(); g.ellipse(cx, 292, 9, 4, 0, 0, 7); g.fill();
+  g.fillStyle = '#d9483a'; g.beginPath(); g.arc(cx, 222, 4, 0, 7); g.fill();
+  g.fillStyle = '#d9a63a'; g.beginPath(); g.moveTo(cx - 44, 196); g.lineTo(cx - 30, 150); g.lineTo(cx - 12, 172); g.lineTo(cx, 128); g.lineTo(cx + 12, 172); g.lineTo(cx + 30, 150); g.lineTo(cx + 44, 196); g.closePath(); g.fill();
+  g.fillStyle = '#c8282a'; [[cx, 168], [cx - 26, 182], [cx + 26, 182]].forEach(([x, y]) => { g.beginPath(); g.arc(x, y, 6, 0, 7); g.fill(); });
+  g.strokeStyle = '#d9a63a'; g.lineWidth = 3; g.beginPath(); g.arc(cx, 330, 54, .25, Math.PI - .25); g.stroke();   // 瓔珞
+  // 右手持楊柳枝
+  g.fillStyle = '#f5dfc8'; g.beginPath(); g.ellipse(cx - 70, 420, 18, 26, -.3, 0, 7); g.fill();
+  g.strokeStyle = '#5a7a3a'; g.lineWidth = 3; g.beginPath(); g.moveTo(cx - 70, 410); g.lineTo(cx - 100, 300); g.stroke();
+  g.fillStyle = '#6fa04a'; for (let i = 0; i < 9; i++) { g.save(); g.translate(cx - 74 - i * 3, 400 - i * 11); g.rotate(i % 2 ? .9 : -.9); g.beginPath(); g.ellipse(0, -10, 3, 12, 0, 0, 7); g.fill(); g.restore(); }
+  // 飛鳥
+  g.strokeStyle = '#4a7a8a'; g.lineWidth = 4; g.beginPath(); g.moveTo(470, 110); g.quadraticCurveTo(500, 80, 530, 108); g.quadraticCurveTo(560, 80, 590, 104); g.stroke();
+  g.fillStyle = '#c94a3a'; g.beginPath(); g.ellipse(530, 112, 12, 6, 0, 0, 7); g.fill();
+  return toTex(c);
+}
+function cxVText(text, bg, fg, frame) {   // 直書條幅（紅底金字聯、黑柱金字）
+  const W = 128, H = 1024, c = document.createElement('canvas'); c.width = W; c.height = H;
+  const g = c.getContext('2d'); g.fillStyle = bg; g.fillRect(0, 0, W, H);
+  g.strokeStyle = frame; g.lineWidth = 5; g.strokeRect(9, 9, W - 18, H - 18);
+  g.fillStyle = fg; g.font = `900 80px ${FONT}`; g.textAlign = 'center'; g.textBaseline = 'middle';
+  g.shadowColor = 'rgba(0,0,0,.35)'; g.shadowBlur = 4;
+  [...text].forEach((ch, i) => g.fillText(ch, W / 2, 40 + (i + .5) * (H - 80) / text.length));
+  return toTex(c);
+}
+function cxTabletTex() {
+  return boardTexture(256, 512, (g, W, H) => {
+    const gr = g.createLinearGradient(0, 0, W, 0); gr.addColorStop(0, '#2a1208'); gr.addColorStop(.5, '#4a2412'); gr.addColorStop(1, '#2a1208');
+    g.fillStyle = gr; g.fillRect(0, 0, W, H); g.strokeStyle = '#c99a3a'; g.lineWidth = 6; g.strokeRect(10, 10, W - 20, H - 20);
+    const col = (t, x, y0, y1, fs, color) => { g.fillStyle = color; g.font = `900 ${fs}px ${FONT}`; const st = (y1 - y0) / t.length; [...t].forEach((ch, i) => g.fillText(ch, x, y0 + st * (i + .5))); };
+    col('曾氏歷代祖考妣之神位', W / 2, 30, 482, 38, '#f2d27a');
+    col('百代孝慈高仰止', W - 50, 50, 380, 24, '#d9b45a');
+    col('千年支派永長流', 50, 50, 380, 24, '#d9b45a');
+    col('陽上子孫奉祀', 50, 392, 488, 14, '#d9b45a');
+  });
+}
+function cxPlateTex() {   // 白瓷盤：粉荷綠葉（照片上的盤子）
+  return boardTexture(256, 256, (g, W, H) => {
+    g.fillStyle = '#fbf9f3'; g.fillRect(0, 0, W, H);
+    const lf = (x, y, r, a) => { g.save(); g.translate(x, y); g.rotate(a); g.fillStyle = 'rgba(105,140,105,.8)'; g.beginPath(); g.ellipse(0, 0, r, r * .72, 0, 0, 7); g.fill(); g.strokeStyle = 'rgba(60,95,65,.55)'; g.lineWidth = 2; for (let k = 0; k < 7; k++) { g.beginPath(); g.moveTo(0, 0); g.lineTo(Math.cos(k * .9) * r * .9, Math.sin(k * .9) * r * .62); g.stroke(); } g.restore(); };
+    const fl = (x, y, r) => { g.fillStyle = 'rgba(240,150,168,.88)'; for (let k = 0; k < 5; k++) { g.save(); g.translate(x, y); g.rotate(k * 1.256); g.beginPath(); g.ellipse(0, -r * .5, r * .35, r * .6, 0, 0, 7); g.fill(); g.restore(); } g.fillStyle = '#f2cf62'; g.beginPath(); g.arc(x, y, r * .2, 0, 7); g.fill(); };
+    lf(196, 62, 34, .5); fl(170, 76, 22); lf(62, 192, 20, 2.2); fl(74, 204, 13);
+    g.strokeStyle = '#3a3a3a'; g.lineWidth = 2; g.beginPath(); g.moveTo(150, 40); g.lineTo(140, 70); g.moveTo(144, 50); g.lineTo(130, 54); g.stroke();
+  });
+}
+function cxLabel(text, bg, fg) {
+  return boardTexture(256, 96, (g, W, H) => { g.fillStyle = bg; g.fillRect(0, 0, W, H); g.fillStyle = fg; g.font = `900 ${text.length > 2 ? 46 : 56}px ${FONT}`; g.fillText(text, W / 2, H / 2 + 2); g.fillStyle = 'rgba(255,255,255,.35)'; g.fillRect(0, 6, W, 4); g.fillRect(0, H - 10, W, 4); });
+}
+function cxChunTex() {   // 紅紙斗方「春」
+  return boardTexture(128, 128, (g, W, H) => {
+    g.fillStyle = '#e8261c'; g.save(); g.translate(W / 2, H / 2); g.rotate(Math.PI / 4); g.fillRect(-44, -44, 88, 88); g.restore();
+    g.fillStyle = '#111'; g.font = `900 54px ${FONT}`; g.fillText('春', W / 2, H / 2 + 3);
+  });
+}
+function cxDrawerTex(n, shou, TW = 2048, TH = 160) {   // 神桌抽屜面：兩側圓形福字紋
+  return boardTexture(TW, TH, (g, W, H) => {
+    g.fillStyle = '#3e1a0c'; g.fillRect(0, 0, W, H);
+    const dw = W / n;
+    for (let i = 0; i < n; i++) {
+      g.strokeStyle = 'rgba(0,0,0,.55)'; g.lineWidth = 6; g.strokeRect(i * dw + 8, 12, dw - 16, H - 24);
+      g.strokeStyle = 'rgba(255,200,150,.12)'; g.lineWidth = 2; g.strokeRect(i * dw + 16, 20, dw - 32, H - 40);
+      if (shou && (i === 0 || i === n - 1)) {
+        const x = i * dw + dw / 2; g.strokeStyle = '#2a1006'; g.lineWidth = 9; g.beginPath(); g.arc(x, H / 2, H * .36, 0, 7); g.stroke();
+        g.fillStyle = '#2a1006'; g.font = `900 ${Math.round(H * .44)}px ${FONT}`; g.fillText('福', x, H / 2 + 3);
+      }
+    }
+  });
+}
+
+/* ---------- 供品元件 ---------- */
+function cxPile(G, n, r, h, make, seed) {   // 在盤中堆成兩層
+  const rnd = mulberry32(seed);
+  for (let i = 0; i < n; i++) {
+    const top = i >= Math.ceil(n * .62), a = rnd() * 6.28, rr = top ? rnd() * r * .45 : r * (.35 + rnd() * .6);
+    const o = make(i, rnd); o.position.set(Math.cos(a) * rr, h * (top ? 1.9 : .9), Math.sin(a) * rr); o.rotation.y = rnd() * 6.28; G.add(o);
+  }
+}
+function cxPlate(r, tex, mat) {
+  const G = new THREE.Group();
+  const body = lathe([[0, 0], [r * .55, 0], [r * .62, .012], [r * .9, .03], [r, .046], [r * .97, .05], [r * .88, .036], [r * .6, .02], [0, .02]], mat, 36); G.add(body);
+  const face = new THREE.Mesh(new THREE.CircleGeometry(r * .9, 36), new THREE.MeshStandardMaterial({ map: tex, roughness: .22 }));
+  face.rotation.x = -Math.PI / 2; face.position.y = .022; G.add(face);
+  return G;
+}
+function cxCompote(mat, rimM) {   // 高腳果盤
+  const G = new THREE.Group();
+  G.add(lathe([[0, 0], [.11, 0], [.11, .02], [.045, .05], [.035, .13], [.07, .155], [.2, .17], [.23, .195], [.22, .2], [0, .175]], mat, 32));
+  const rim = new THREE.Mesh(new THREE.TorusGeometry(.225, .008, 6, 32), rimM); rim.rotation.x = Math.PI / 2; rim.position.y = .197; G.add(rim);
+  return G;
+}
+function cxBottle(kind, labelTex) {
+  const G = new THREE.Group(), K = {
+    soda:  { c: '#2f7a3a', op: .82, cap: '#c8282a', prof: [[0, 0], [.042, 0], [.045, .02], [.045, .17], [.03, .23], [.016, .27], [.016, .3], [0, .3]] },
+    juice: { c: '#f29a1c', op: .9,  cap: '#f4f1ea', prof: [[0, 0], [.04, 0], [.045, .02], [.045, .2], [.025, .25], [.018, .27], [0, .27]] },
+    tea:   { c: '#8a5a1a', op: .9,  cap: '#2f7a3a', prof: [[0, 0], [.04, 0], [.043, .02], [.043, .19], [.024, .24], [.017, .265], [0, .265]] },
+    wine:  { c: '#e8dca0', op: .55, cap: '#c8282a', prof: [[0, 0], [.048, 0], [.05, .02], [.05, .2], [.034, .25], [.018, .29], [.018, .33], [0, .33]] },
+  }[kind];
+  const body = lathe(K.prof, new THREE.MeshStandardMaterial({ color: K.c, roughness: .08, metalness: .1, transparent: true, opacity: K.op }), 24); G.add(body);
+  const top = K.prof[K.prof.length - 2];
+  const cap = new THREE.Mesh(new THREE.CylinderGeometry(top[0] + .003, top[0] + .003, .025, 14), rtMat(K.cap, .4)); cap.position.y = top[1] - .005; G.add(cap);
+  const lr = K.prof[3][0] + .002, lb = new THREE.Mesh(new THREE.CylinderGeometry(lr, lr, .08, 24, 1, true), new THREE.MeshStandardMaterial({ map: labelTex, roughness: .4 }));
+  lb.position.y = .1; lb.rotation.y = Math.PI; G.add(lb);
+  return G;
+}
+function cxChunFlag(tex, s = 1) {
+  const O = new THREE.Group(), G = new THREE.Group(); O.add(G);
+  const pick = new THREE.Mesh(new THREE.CylinderGeometry(.003, .003, .16, 5), rtMat('#d8b878', .7)); pick.position.y = .08; G.add(pick);
+  const f = new THREE.Mesh(new THREE.PlaneGeometry(.11, .11), new THREE.MeshStandardMaterial({ map: tex, transparent: true, alphaTest: .1, side: THREE.DoubleSide, roughness: .8 }));
+  f.position.y = .2; G.add(f); G.scale.setScalar(s); return O;
+}
+function cxCenser(D, brass, x, y, z, s, qilin) {   // 銅香爐（香灰、三炷香常燃）
+  const G = new THREE.Group(); G.position.set(x, y, z); G.scale.setScalar(s); D.add(G);
+  G.add(lathe([[0, 0], [.15, 0], [.16, .03], [.12, .06], [.19, .12], [.215, .2], [.2, .26], [.21, .28], [.205, .29], [0, .29]], brass, 32));
+  [.12, .2].forEach(y0 => { const b = new THREE.Mesh(new THREE.TorusGeometry(y0 < .15 ? .19 : .215, .01, 6, 32), M.gold); b.rotation.x = Math.PI / 2; b.position.y = y0; G.add(b); });
+  const ash = new THREE.Mesh(new THREE.CircleGeometry(.19, 28), rtMat('#ebe7df', .95)); ash.rotation.x = -Math.PI / 2; ash.position.y = .292; G.add(ash);
+  [-1, 1].forEach(sx => {
+    if (qilin) {   // 祖先爐兩側小麒麟耳
+      const q = new THREE.Group(); q.position.set(sx * .25, .22, 0); G.add(q);
+      const bd = new THREE.Mesh(new THREE.SphereGeometry(.045, 10, 8), brass); bd.scale.set(.8, 1, 1.2); q.add(bd);
+      const hd = new THREE.Mesh(new THREE.SphereGeometry(.03, 10, 8), brass); hd.position.set(sx * .01, .06, .03); q.add(hd);
+    } else { const ear = new THREE.Mesh(new THREE.TorusGeometry(.05, .014, 6, 14), brass); ear.position.set(sx * .23, .27, 0); G.add(ear); }
+  });
+  [-.05, 0, .05].forEach(dx => { const st = new THREE.Mesh(new THREE.CylinderGeometry(.007, .007, .45, 6), rtMat('#c8321e', .6)); st.position.set(dx, .29 + .22, 0); G.add(st); makeEmber(G, dx, .29 + .45, 0, .012); });
+  return G;
+}
+function cxBoatStand(brass, w) {   // 蓮花供台（兩端上翹）
+  const G = new THREE.Group();
+  const lotusTex = boardTexture(512, 96, (g, W, H) => {
+    g.fillStyle = '#9a7a40'; g.fillRect(0, 0, W, H); g.strokeStyle = '#5a4018'; g.lineWidth = 4; g.strokeRect(6, 6, W - 12, H - 12);
+    g.fillStyle = '#c9a85a'; for (let k = -3; k <= 3; k++) { g.save(); g.translate(W / 2, H - 14); g.rotate(k * .36); g.beginPath(); g.ellipse(0, -34, 11, 30, 0, 0, 7); g.fill(); g.restore(); }
+    g.strokeStyle = '#6a4a18'; g.lineWidth = 3; for (let i = 0; i < 8; i++) { g.beginPath(); g.arc(40 + i * 18, H / 2, 10, 0, Math.PI * 1.5); g.stroke(); g.beginPath(); g.arc(W - 40 - i * 18, H / 2, 10, 0, Math.PI * 1.5); g.stroke(); }
+  });
+  const face = new THREE.MeshStandardMaterial({ map: lotusTex, metalness: .6, roughness: .38 });
+  const body = new THREE.Mesh(new THREE.BoxGeometry(w, .09, .13), [brass, brass, brass, brass, face, brass]); body.position.y = .2; G.add(body);
+  [-1, 1].forEach(sx => {
+    const end = new THREE.Mesh(new THREE.BoxGeometry(.16, .025, .15), brass); end.position.set(sx * (w / 2 + .05), .26, 0); end.rotation.z = sx * .45; G.add(end);
+    const scroll = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .15, 10), brass); scroll.rotation.x = Math.PI / 2; scroll.position.set(sx * (w / 2 + .12), .3, 0); G.add(scroll);
+    const leg = new THREE.Mesh(new THREE.BoxGeometry(.06, .12, .1), brass); leg.position.set(sx * w * .3, .06, 0); G.add(leg);
+  });
+  const base = new THREE.Mesh(new THREE.BoxGeometry(w * .62, .1, .12), [brass, brass, brass, brass, face, brass]); base.position.y = .1; G.add(base);
+  const gem = new THREE.Mesh(new THREE.SphereGeometry(.014, 8, 6), rtMat('#c8282a', .3)); gem.position.set(0, .1, .062); G.add(gem);
+  return G;
+}
+
+function buildChuxi() {
+  const H = HS.chuxi; if (H.built) return; H.built = true;
+  const ox = (ROUTE.built ? ROUTE.g.position.x : bounds.maxX + 15) + 90, oy = -14;
+  const D = new THREE.Group(); D.position.set(ox, oy, 0); scene.add(D); H.g = D;
+  const om = offerMats();
+  const woodD = new THREE.MeshStandardMaterial({ color: '#3a160a', roughness: .22, metalness: .05, envMapIntensity: .9 });   // 亮面紅木
+  const black = new THREE.MeshStandardMaterial({ color: '#1c0e08', roughness: .3, envMapIntensity: .8 });
+  const brass = new THREE.MeshStandardMaterial({ color: '#b89a5e', metalness: .78, roughness: .3, envMapIntensity: 1.1 });
+  const statueGold = new THREE.MeshStandardMaterial({ color: '#d9a63a', metalness: .72, roughness: .28, envMapIntensity: 1.2 });
+  const porc = porcelain.clone(); porc.side = THREE.DoubleSide;
+  // 地板（木紋）、牆、天花
+  const fl = boardTexture(512, 512, (x, w, h) => { x.fillStyle = '#8a5a34'; x.fillRect(0, 0, w, h); const r = mulberry32(21); for (let i = 0; i < 8; i++) { x.fillStyle = `rgba(${r() < .5 ? '60,30,10' : '170,110,60'},.25)`; x.fillRect(0, i * 64, w, 64); x.strokeStyle = 'rgba(40,20,8,.6)'; x.lineWidth = 2; x.beginPath(); x.moveTo(0, i * 64); x.lineTo(w, i * 64); x.stroke(); } for (let i = 0; i < 900; i++) { x.fillStyle = 'rgba(50,25,10,.12)'; x.fillRect(r() * w, r() * h, 30 + r() * 60, 1); } });
+  fl.wrapS = fl.wrapT = THREE.RepeatWrapping; fl.repeat.set(4, 4);
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(12, 13), new THREE.MeshStandardMaterial({ map: fl, roughness: .35 })); floor.rotation.x = -Math.PI / 2; floor.position.z = 3.4; D.add(floor);
+  const wallTex = boardTexture(256, 256, (x, w, h) => { x.fillStyle = '#efe2c6'; x.fillRect(0, 0, w, h); x.fillStyle = '#6a3018'; x.fillRect(0, h - 44, w, 44); x.fillStyle = '#c99a3a'; x.fillRect(0, h - 48, w, 4); });
+  wallTex.wrapS = THREE.RepeatWrapping; wallTex.repeat.set(4, 1);
+  const wallM = new THREE.MeshStandardMaterial({ map: wallTex, roughness: .85 });
+  [-1, 1].forEach(sx => { const w = new THREE.Mesh(new THREE.PlaneGeometry(13, 5.2), wallM); w.rotation.y = -sx * Math.PI / 2; w.position.set(sx * 6, 2.6, 3.4); D.add(w); });
+  const back = new THREE.Mesh(new THREE.PlaneGeometry(12, 5.2), wallM); back.position.set(0, 2.6, -3.05); D.add(back);
+  const ceil = new THREE.Mesh(new THREE.PlaneGeometry(12, 13), rtMat('#e8dcc4', .9)); ceil.rotation.x = Math.PI / 2; ceil.position.set(0, 5.2, 3.4); D.add(ceil);
+  // 年節：兩側牆貼「福」斗方、天花垂掛紅燈籠
+  const fuTex = boardTexture(256, 256, (g, W, Hh) => { g.fillStyle = '#d81e1a'; g.save(); g.translate(W / 2, Hh / 2); g.rotate(Math.PI / 4); g.fillRect(-88, -88, 176, 176); g.restore(); g.fillStyle = '#f2c94c'; g.font = `900 120px ${FONT}`; g.fillText('福', W / 2, Hh / 2 + 6); });
+  [-1, 1].forEach(sx => { const f = new THREE.Mesh(new THREE.PlaneGeometry(1.1, 1.1), new THREE.MeshStandardMaterial({ map: fuTex, transparent: true, alphaTest: .1 })); f.rotation.y = -sx * Math.PI / 2; f.position.set(sx * 5.98, 2.9, 1.2); D.add(f); });
+  const lanM = new THREE.MeshStandardMaterial({ color: '#d81e1a', emissive: '#a01008', emissiveIntensity: .7, roughness: .6 });
+  [-2.6, 2.6].forEach(x => {
+    const L = new THREE.Group(); L.position.set(x, 4.25, 1.4); D.add(L);
+    const cord = new THREE.Mesh(new THREE.CylinderGeometry(.008, .008, .5, 4), rtMat('#2a1a10')); cord.position.y = .7; L.add(cord);
+    const ball = new THREE.Mesh(new THREE.SphereGeometry(.32, 20, 14), lanM); ball.scale.set(1.15, .9, 1.15); L.add(ball);
+    [.3, -.3].forEach(y => { const cp = new THREE.Mesh(new THREE.CylinderGeometry(.14, .14, .07, 16), M.gold); cp.position.y = y; L.add(cp); });
+    const tas = new THREE.Mesh(new THREE.CylinderGeometry(.03, .06, .32, 8), rtMat('#e8b030', .7)); tas.position.y = -.5; L.add(tas);
+    const pl = new THREE.PointLight('#ff6a40', .8, 3.5, 1.5); L.add(pl);
+  });
+
+  // ---------- 頂桌 ----------
+  const TY = 1.3, TZ = -2.33, TW = 3.9, TD = 1.15;
+  const ttop = new THREE.Mesh(new THREE.BoxGeometry(TW + .1, .07, TD + .06), woodD); ttop.position.set(0, TY - .035, TZ); D.add(ttop);
+  const tFront = new THREE.Mesh(new THREE.BoxGeometry(TW, TY - .07, TD), woodD); tFront.position.set(0, (TY - .07) / 2, TZ); D.add(tFront);
+  const tDraw = new THREE.Mesh(new THREE.PlaneGeometry(TW, .3), new THREE.MeshStandardMaterial({ map: cxDrawerTex(3, true, 2048, 160), roughness: .25, envMapIntensity: .7 })); tDraw.position.set(0, TY - .2, TZ + TD / 2 + .002); D.add(tDraw);
+  // 神龕櫃：背板、觀音彩繪、對聯、外柱、側板、雕花頂框、紅燈
+  const cabBack = new THREE.Mesh(new THREE.BoxGeometry(TW, 3.3, .08), black); cabBack.position.set(0, TY + 1.65, -2.95); D.add(cabBack);
+  const paint = new THREE.Mesh(new THREE.PlaneGeometry(1.75, 2.75), new THREE.MeshStandardMaterial({ map: cxPainting(), roughness: .7 })); paint.position.set(0, TY + 1.5, -2.875); D.add(paint);
+  const pf = new THREE.Mesh(new THREE.PlaneGeometry(1.86, 2.86), rtMat('#b4161c', .5)); pf.position.set(0, TY + 1.5, -2.895); D.add(pf);
+  [[-1, '祖宗長佑子孫賢'], [1, '佛力永扶家門盛']].forEach(([sx, t]) => {
+    const cp = new THREE.Mesh(new THREE.PlaneGeometry(.42, 2.6), new THREE.MeshStandardMaterial({ map: cxVText(t, '#d8401c', '#f6d27a', '#e8b04a'), roughness: .5 })); cp.position.set(sx * 1.2, TY + 1.5, -2.9); D.add(cp);
+  });
+  [[-1, '寶鼎呈祥香結彩'], [1, '銀台吐艷燭生輝']].forEach(([sx, t]) => {
+    const post = new THREE.Mesh(new THREE.BoxGeometry(.34, 3.3, .3), [black, black, black, black, new THREE.MeshStandardMaterial({ map: cxVText(t, '#1c0e08', '#e0b860', '#5a3a18'), roughness: .3 }), black]);
+    post.position.set(sx * 1.78, TY + 1.65, -2.72); D.add(post);
+    const side = new THREE.Mesh(new THREE.BoxGeometry(.08, 3.3, TD), woodD); side.position.set(sx * 1.97, TY + 1.65, TZ); D.add(side);
+  });
+  const carveTex = boardTexture(1024, 160, (x, w, h) => {
+    x.fillStyle = '#1c0e08'; x.fillRect(0, 0, w, h); const r = mulberry32(31);
+    x.strokeStyle = '#5a3a1e'; x.lineWidth = 5; for (let i = 0; i < 70; i++) { x.beginPath(); x.arc(r() * w, r() * h, 10 + r() * 22, r() * 6, r() * 6 + 3.5); x.stroke(); }
+    x.strokeStyle = '#c99a3a'; x.lineWidth = 4; x.strokeRect(6, 6, w - 12, h - 12);
+    x.fillStyle = '#2a160c'; x.beginPath(); x.ellipse(w / 2, h / 2, 110, 54, 0, 0, 7); x.fill(); x.strokeStyle = '#8a6a3a'; x.lineWidth = 6; x.stroke();
+  });
+  const canopy = new THREE.Mesh(new THREE.BoxGeometry(TW + .3, .62, .5), [black, black, black, black, new THREE.MeshStandardMaterial({ map: carveTex, roughness: .35 }), black]); canopy.position.set(0, TY + 3.55, -2.62); D.add(canopy);
+  const arch = new THREE.Mesh(new THREE.TorusGeometry(1.75, .07, 8, 40, Math.PI), black); arch.scale.set(1, .18, 1); arch.rotation.z = Math.PI; arch.position.set(0, TY + 3.25, -2.42); D.add(arch);
+  const bulbM = new THREE.MeshStandardMaterial({ color: '#ff2a1a', emissive: '#ff1a0a', emissiveIntensity: 1.4 });
+  [-.75, .75].forEach(x => { const b = new THREE.Mesh(new THREE.SphereGeometry(.07, 12, 10), bulbM); b.scale.set(.75, 1.6, .75); b.position.set(x, TY + 3.05, -2.45); D.add(b); const pl = new THREE.PointLight('#ff3a2a', .35, 2, 2); pl.position.copy(b.position); D.add(pl); });
+
+  // 左：玻璃龕歷代祖先神位
+  const AC = new THREE.Group(); AC.position.set(-1.02, TY, -2.62); D.add(AC);
+  const acb = new THREE.Mesh(new THREE.BoxGeometry(.58, .06, .42), woodD); acb.position.y = .03; AC.add(acb);
+  const act = new THREE.Mesh(new THREE.BoxGeometry(.58, .05, .42), woodD); act.position.y = .78; AC.add(act);
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => { const p = new THREE.Mesh(new THREE.BoxGeometry(.03, .7, .03), woodD); p.position.set(sx * .27, .41, sz * .19); AC.add(p); });
+  const tPed = new THREE.Mesh(new THREE.BoxGeometry(.34, .1, .16), woodD); tPed.position.y = .11; AC.add(tPed);
+  const tab = new THREE.Mesh(new THREE.BoxGeometry(.26, .5, .04), [black, black, black, black, new THREE.MeshStandardMaterial({ map: cxTabletTex(), roughness: .35 }), black]); tab.position.set(0, .41, 0); AC.add(tab);
+  const tCap = new THREE.Mesh(new THREE.BoxGeometry(.3, .05, .07), M.gold); tCap.position.y = .68; AC.add(tCap);
+  const glass = new THREE.Mesh(new THREE.BoxGeometry(.55, .7, .4), new THREE.MeshStandardMaterial({ color: '#dfe8ec', transparent: true, opacity: .12, roughness: .05, metalness: .2, depthWrite: false })); glass.position.y = .41; AC.add(glass);
+
+  // 中：雕花佛龕（佛光普照）金身觀音
+  const SH = new THREE.Group(); SH.position.set(0, TY, -2.66); D.add(SH);
+  const sb = new THREE.Mesh(new THREE.BoxGeometry(.82, .12, .44), black); sb.position.y = .06; SH.add(sb);
+  const sBackTex = boardTexture(256, 320, (g, W, Hh) => { const gr = g.createRadialGradient(W / 2, Hh * .4, 10, W / 2, Hh * .4, 160); gr.addColorStop(0, '#f2b860'); gr.addColorStop(.5, '#c8402a'); gr.addColorStop(1, '#5a1208'); g.fillStyle = gr; g.fillRect(0, 0, W, Hh); g.strokeStyle = '#3a8a8a'; g.lineWidth = 6; for (let i = 0; i < 4; i++) { g.beginPath(); g.arc(W / 2, Hh * .4, 60 + i * 22, Math.PI * 1.1, Math.PI * 1.9); g.stroke(); } });
+  const sBack = new THREE.Mesh(new THREE.PlaneGeometry(.72, .92), new THREE.MeshStandardMaterial({ map: sBackTex, roughness: .6 })); sBack.position.set(0, .58, -.19); SH.add(sBack);
+  [-1, 1].forEach(sx => { const p = new THREE.Mesh(new THREE.BoxGeometry(.07, 1.0, .4), black); p.position.set(sx * .38, .6, 0); SH.add(p); const lat = new THREE.Mesh(new THREE.BoxGeometry(.012, .85, .3), M.gold); lat.position.set(sx * .345, .58, 0); SH.add(lat); });
+  const sTopTex = boardTexture(256, 64, (g, W, Hh) => { g.fillStyle = '#1c0e08'; g.fillRect(0, 0, W, Hh); g.fillStyle = '#e0b860'; g.font = `900 34px ${FONT}`; g.fillText('佛光普照', W / 2, Hh / 2 + 2); });
+  const sTop = new THREE.Mesh(new THREE.BoxGeometry(.9, .16, .46), [black, black, black, black, new THREE.MeshStandardMaterial({ map: sTopTex, roughness: .35 }), black]); sTop.position.y = 1.16; SH.add(sTop);
+  const GY = new THREE.Group(); GY.position.set(0, .12, -.02); GY.scale.setScalar(.95); SH.add(GY);   // 觀音坐像
+  GY.add(lathe([[0, 0], [.2, 0], [.24, .04], [.2, .1], [0, .1]], statueGold, 24));
+  for (let i = 0; i < 12; i++) { const a = i / 12 * Math.PI * 2, pet = new THREE.Mesh(new THREE.SphereGeometry(.05, 8, 6), statueGold); pet.scale.set(.7, .5, 1.1); pet.position.set(Math.cos(a) * .2, .07, Math.sin(a) * .2); pet.rotation.y = -a; GY.add(pet); }
+  const lap = new THREE.Mesh(new THREE.SphereGeometry(.18, 18, 12), statueGold); lap.scale.set(1.1, .35, .8); lap.position.set(0, .15, .03); GY.add(lap);
+  const torso = lathe([[0, 0], [.13, 0], [.14, .08], [.11, .22], [.07, .3], [0, .31]], statueGold, 20); torso.position.y = .15; GY.add(torso);
+  const head = new THREE.Mesh(new THREE.SphereGeometry(.06, 16, 12), rtMat('#e8c88a', .35, { metalness: .4 })); head.scale.set(1, 1.15, .95); head.position.y = .52; GY.add(head);
+  const crown = new THREE.Mesh(new THREE.ConeGeometry(.055, .1, 6), statueGold); crown.position.y = .61; GY.add(crown);
+  const halo = new THREE.Mesh(new THREE.TorusGeometry(.1, .008, 6, 24), statueGold); halo.position.set(0, .54, -.08); GY.add(halo);
+  [-1, 1].forEach(sx => { const h2 = new THREE.Mesh(new THREE.SphereGeometry(.025, 8, 6), statueGold); h2.position.set(sx * .05, .3, .12); GY.add(h2); });
+  const vase = new THREE.Mesh(new THREE.CylinderGeometry(.012, .02, .06, 8), rtMat('#f4f1ea', .3)); vase.position.set(-.05, .35, .13); GY.add(vase);
+
+  // 右：鹽燈
+  const SL = new THREE.Group(); SL.position.set(1.18, TY, -2.6); D.add(SL);
+  SL.add(lathe([[0, 0], [.14, 0], [.16, .04], [.22, .12], [.24, .14], [0, .14]], brass, 24));
+  const rockG = new THREE.IcosahedronGeometry(.22, 2), pa = rockG.attributes.position, rr = mulberry32(13);
+  const disp = new Map();
+  for (let i = 0; i < pa.count; i++) { const k = `${pa.getX(i).toFixed(3)},${pa.getY(i).toFixed(3)},${pa.getZ(i).toFixed(3)}`; if (!disp.has(k)) disp.set(k, .85 + rr() * .3); const f = disp.get(k); pa.setXYZ(i, pa.getX(i) * f, pa.getY(i) * f, pa.getZ(i) * f); }
+  rockG.computeVertexNormals();
+  const rock = new THREE.Mesh(rockG, new THREE.MeshStandardMaterial({ color: '#f2a070', emissive: '#ff6a20', emissiveIntensity: .55, roughness: .9, flatShading: true })); rock.scale.set(1, 1.35, .95); rock.position.y = .42; SL.add(rock);
+  const slL = new THREE.PointLight('#ff8a40', 1.3, 4, 1.4); slL.position.y = .45; SL.add(slL);
+  // 佛珠（粉色水晶）
+  for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, b = new THREE.Mesh(new THREE.SphereGeometry(.022, 8, 6), rtMat(i % 5 ? '#e8a8b0' : '#5a3a2a', .2)); b.position.set(1.55 + Math.cos(a) * .09, TY + .025, -2.45 + Math.sin(a) * .06); D.add(b); }
+  // 蝴蝶蘭（左側盆栽，花梗拱過神龕上方）
+  const pot = lathe([[0, 0], [.14, 0], [.17, .3], [.16, .31], [0, .29]], new THREE.MeshStandardMaterial({ color: '#f6f4ef', roughness: .3 }), 24); pot.position.set(-1.66, TY, -2.36); D.add(pot);
+  for (let i = 0; i < 4; i++) { const lf2 = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 8), om.leaf); lf2.scale.set(1, .12, .45); lf2.position.set(-1.66 + Math.cos(i * 1.6) * .13, TY + .36, -2.36 + Math.sin(i * 1.6) * .1); lf2.rotation.set(0, -i * 1.6, (i % 2 ? .4 : -.4)); D.add(lf2); }
+  const stemC = new THREE.CatmullRomCurve3([V(-1.66, TY + .3, -2.36), V(-1.55, TY + 1.6, -2.4), V(-1.2, TY + 2.65, -2.4), V(0, TY + 2.95, -2.3), V(1.0, TY + 2.75, -2.3), V(1.4, TY + 2.55, -2.3)]);
+  D.add(new THREE.Mesh(new THREE.TubeGeometry(stemC, 40, .01, 5), om.stem));
+  const orchM = new THREE.MeshStandardMaterial({ color: '#a8279a', roughness: .5, side: THREE.DoubleSide }), lipM = new THREE.MeshStandardMaterial({ color: '#f2e0f0', roughness: .5, side: THREE.DoubleSide });
+  [.84, .9, .96, 1].forEach((t, i) => {
+    const p = stemC.getPoint(t), F = new THREE.Group(); F.position.copy(p).add(V(0, -.06, .05)); F.scale.setScalar(1 - i * .08); D.add(F);
+    for (let k = 0; k < 5; k++) { const pt = new THREE.Mesh(new THREE.CircleGeometry(.07, 12), k < 2 ? orchM : orchM); pt.scale.set(k < 2 ? 1.1 : .55, k < 2 ? .9 : 1, 1); const a = k / 5 * Math.PI * 2; pt.position.set(Math.cos(a) * .06, Math.sin(a) * .06, 0); F.add(pt); }
+    const lip = new THREE.Mesh(new THREE.CircleGeometry(.03, 10), lipM); lip.position.z = .005; F.add(lip);
+  });
+  // 水晶蓮花燈
+  const crystal = new THREE.MeshStandardMaterial({ color: '#ffd58a', emissive: '#ffb040', emissiveIntensity: .7, transparent: true, opacity: .75, roughness: .05 });
+  [-1.55, 1.58].forEach(x => {
+    const CL = new THREE.Group(); CL.position.set(x, TY, -2.05); D.add(CL);
+    const st2 = new THREE.Mesh(new THREE.CylinderGeometry(.1, .11, .05, 16), new THREE.MeshStandardMaterial({ color: '#eef4f6', transparent: true, opacity: .6, roughness: .05 })); st2.position.y = .07; CL.add(st2);
+    for (let r = 0; r < 2; r++) for (let i = 0; i < 8; i++) { const a = (i + r * .5) / 8 * Math.PI * 2, p = new THREE.Mesh(new THREE.SphereGeometry(.05, 8, 6), crystal); p.scale.set(.45, 1, .3); p.position.set(Math.cos(a) * (r ? .04 : .07), .15 + r * .03, Math.sin(a) * (r ? .04 : .07)); p.rotation.set(Math.sin(a) * .5, -a, -Math.cos(a) * .5); CL.add(p); }
+  });
+  // 兩座香爐＋三杯＋蓮花供台
+  const censers = [cxCenser(D, brass, -1.02, TY, -2.27, .78, true), cxCenser(D, brass, 0, TY, -2.28, 1.02, false)];
+  const cupG = lathe([[0, 0], [.025, 0], [.03, .015], [.034, .06], [.03, .062], [0, .02]], brass, 16);
+  censers.forEach(cs => {
+    [-.13, 0, .13].forEach(dx => { const c2 = cupG.clone(); c2.position.set(cs.position.x + dx * cs.scale.x * 1.3, TY, -2.02); D.add(c2); const tea = new THREE.Mesh(new THREE.CircleGeometry(.027, 12), om.tea); tea.rotation.x = -Math.PI / 2; tea.position.set(c2.position.x, TY + .05, -2.02); D.add(tea); });
+    const bs = cxBoatStand(brass, cs.scale.x * .62); bs.position.set(cs.position.x, TY, -1.86); D.add(bs);
+  });
+  D.updateMatrixWorld(true);
+  H.censers = censers;
+  H.censerTip = censers[1].localToWorld(new THREE.Vector3(0, .76, 0));
+  H.ancTip = censers[0].localToWorld(new THREE.Vector3(0, .76, 0));
+  addSmoke(H.censerTip, 12, 0, { sz: .4, op: .26, h: 2 });
+  addSmoke(H.ancTip, 10, 0, { sz: .35, op: .24, h: 1.8 });
+
+  // ---------- 下桌（供品桌） ----------
+  const LY = .95, LZ = -1.1, LW = 3.8, LD = 1.3;
+  const ltop = new THREE.Mesh(new THREE.BoxGeometry(LW + .08, .06, LD + .04), woodD); ltop.position.set(0, LY - .03, LZ); D.add(ltop);
+  const lFront = new THREE.Mesh(new THREE.BoxGeometry(LW, .22, LD - .06), [woodD, woodD, woodD, woodD, new THREE.MeshStandardMaterial({ map: cxDrawerTex(4, false, 2048, 120), roughness: .25 }), woodD]); lFront.position.set(0, LY - .17, LZ); D.add(lFront);
+  [[-1, -1], [1, -1], [-1, 1], [1, 1]].forEach(([sx, sz]) => { const l = new THREE.Mesh(new THREE.BoxGeometry(.1, LY - .28, .1), woodD); l.position.set(sx * (LW / 2 - .08), (LY - .28) / 2, LZ + sz * (LD / 2 - .08)); D.add(l); });
+  const apron = new THREE.Mesh(new THREE.BoxGeometry(LW - .3, .04, .04), woodD); apron.position.set(0, .16, LZ + LD / 2 - .08); D.add(apron);
+  const at = (x, z, o) => { o.position.set(x, LY, z); o.visible = false; D.add(o); return o; };
+  const G = CX.groups = {};
+  // 鮮花一對
+  G.flower = [-1.68, 1.68].map((x, vi) => {
+    const F = new THREE.Group();
+    F.add(lathe([[0, 0], [.08, 0], [.11, .1], [.09, .2], [.05, .27], [.06, .32], [0, .32]], om.vase, 24));
+    const rnd = mulberry32(40 + vi);
+    for (let i = 0; i < 9; i++) {
+      const a = i / 9 * Math.PI * 2 + rnd(), r = .06 + rnd() * .1, h = .55 + rnd() * .25, tip = V(Math.cos(a) * r, h, Math.sin(a) * r * .7);
+      F.add(new THREE.Mesh(new THREE.TubeGeometry(new THREE.LineCurve3(V(0, .3, 0), tip), 1, .006, 4), om.stem));
+      const kind = i % 3, fh = new THREE.Mesh(new THREE.SphereGeometry(kind === 2 ? .045 : .055, 10, 8), kind === 0 ? om.yellow : kind === 1 ? om.white : rtMat('#d8264a', .55));
+      fh.scale.y = kind === 1 ? 1.2 : .7; fh.position.copy(tip); F.add(fh);
+      if (i % 2) { const lf3 = new THREE.Mesh(new THREE.SphereGeometry(.05, 8, 6), om.leaf); lf3.scale.set(.4, .12, 1); lf3.position.copy(tip).multiplyScalar(.7).add(V(0, .1, 0)); lf3.rotation.y = a; F.add(lf3); }
+    }
+    return at(x, -1.5, F);
+  });
+  // 素果三盤：蘋果（平安）、橘子（大吉）、鳳梨（旺來）
+  const lacRed = new THREE.MeshStandardMaterial({ color: '#a8161a', roughness: .3, side: THREE.DoubleSide });
+  const fruitPile = (mat, r, n, seed) => { const P = new THREE.Group(); cxPile(P, n, .1, r * .95, () => { const s = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), mat); s.scale.y = .9; return s; }, seed); return P; };
+  const apple = cxCompote(lacRed, M.gold); const ap = fruitPile(om.apple, .058, 6, 3); ap.position.y = .17; apple.add(ap);
+  ap.children.forEach(a => { const st3 = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, .03, 4), rtMat('#5a3a1a')); st3.position.set(a.position.x, a.position.y + .055, a.position.z); ap.add(st3); });
+  const orange = cxCompote(lacRed, M.gold); const orp = fruitPile(om.orange, .055, 7, 5); orp.position.y = .17; orange.add(orp);
+  const top1 = orp.children.reduce((m, o) => o.position.y > m.position.y ? o : m); const olf = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), om.leaf); olf.scale.set(1, .2, .5); olf.position.copy(top1.position).add(V(.015, .05, 0)); orp.add(olf);
+  const pine = cxCompote(lacRed, M.gold);
+  const pineTex = boardTexture(128, 128, (g, W, Hh) => { g.fillStyle = '#c88a2a'; g.fillRect(0, 0, W, Hh); g.strokeStyle = '#6a4210'; g.lineWidth = 3; for (let i = -W; i < W * 2; i += 16) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i + Hh, Hh); g.stroke(); g.beginPath(); g.moveTo(i + Hh, 0); g.lineTo(i, Hh); g.stroke(); } g.fillStyle = '#e8b040'; for (let x = 8; x < W; x += 16) for (let y = 8; y < Hh; y += 16) { g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); } });
+  pineTex.wrapS = pineTex.wrapT = THREE.RepeatWrapping; pineTex.repeat.set(3, 2);
+  const pb = new THREE.Mesh(new THREE.SphereGeometry(.1, 20, 14), new THREE.MeshStandardMaterial({ map: pineTex, roughness: .7 })); pb.scale.y = 1.45; pb.position.y = .17 + .13; pine.add(pb);
+  for (let i = 0; i < 11; i++) { const a = i / 11 * Math.PI * 2, cr = new THREE.Mesh(new THREE.ConeGeometry(.018, .2 + (i % 3) * .04, 4), rtMat('#3f7a2a', .6)); cr.position.set(Math.cos(a) * .025, .17 + .27 + .08, Math.sin(a) * .025); cr.rotation.set(Math.sin(a) * .45, 0, -Math.cos(a) * .45); pine.add(cr); }
+  G.fruit = [at(-.95, -1.5, apple), at(0, -1.5, orange), at(.95, -1.5, pine)];
+  // 糖果五盤（荷花白瓷盤）
+  const plateTex = cxPlateTex(), gold2 = new THREE.MeshStandardMaterial({ color: '#e8b830', metalness: .85, roughness: .25 });
+  const candyCols = ['#e8261c', '#2a7ad8', '#f2c230', '#3aa84a', '#d84a9a', '#f07a1a'];
+  const candies = [
+    (i, r) => { const c3 = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .007, 16), gold2); c3.rotation.set((r() - .5) * .5, 0, (r() - .5) * .5); return c3; },   // 金幣巧克力
+    (i, r) => { const C = new THREE.Group(), m2 = rtMat(candyCols[i % candyCols.length], .25); const b = new THREE.Mesh(new THREE.SphereGeometry(.018, 10, 8), m2); b.scale.x = 1.4; C.add(b); [-1, 1].forEach(s => { const w2 = new THREE.Mesh(new THREE.ConeGeometry(.014, .022, 6), m2); w2.rotation.z = s * Math.PI / 2; w2.position.x = s * .035; C.add(w2); }); return C; },   // 彩色包裝糖
+    () => new THREE.Mesh(new THREE.BoxGeometry(.055, .018, .035), rtMat('#c8954a', .7)),   // 花生糖
+    () => { const m2 = new THREE.Mesh(new THREE.BoxGeometry(.032, .022, .032), [rtMat('#f6f2e6', .5), rtMat('#f6f2e6', .5), rtMat('#2a5ab8', .5), rtMat('#f6f2e6', .5), rtMat('#f6f2e6', .5), rtMat('#f6f2e6', .5)]); return m2; },   // 牛奶糖
+    () => new THREE.Mesh(new THREE.BoxGeometry(.075, .02, .02), rtMat('#f4f0e2', .95)),   // 冬瓜糖
+  ];
+  const cN = [14, 11, 7, 10, 8], cH = [.008, .02, .018, .022, .02];
+  G.candy = [-1.44, -.72, 0, .72, 1.44].map((x, i) => { const P = cxPlate(.17, plateTex, porc); const pile = new THREE.Group(); pile.position.y = .02; cxPile(pile, cN[i], .1, cH[i], candies[i], 60 + i); P.add(pile); return at(x, -1.08, P); });
+  // 飲料
+  G.drink = [['soda', '汽水', '#1f6b3a', '#fff'], ['juice', '果汁', '#f2c230', '#c8401c'], ['tea', '烏龍茶', '#f4f1ea', '#5a3410'], ['wine', '米酒', '#c8161c', '#f6d27a']].map(([k, t, bg, fg], i) => at(.84 + i * .29, -.68, cxBottle(k, cxLabel(t, bg, fg))));
+  // 三牲：雞、豬肉、魚（紅漆長盤）
+  const S3 = new THREE.Group();
+  const trayM = new THREE.MeshStandardMaterial({ color: '#b01a14', roughness: .3 });
+  const tray = new THREE.Mesh(new THREE.BoxGeometry(1.0, .03, .44), trayM); tray.position.y = .015; S3.add(tray);
+  [-1, 1].forEach(sz => { const e = new THREE.Mesh(new THREE.BoxGeometry(1.0, .035, .02), M.gold); e.position.set(0, .04, sz * .22); S3.add(e); });
+  [-1, 1].forEach(sx => { const e = new THREE.Mesh(new THREE.BoxGeometry(.02, .035, .44), M.gold); e.position.set(sx * .5, .04, 0); S3.add(e); });
+  const skinC = new THREE.MeshStandardMaterial({ color: '#e8c070', roughness: .38 });
+  const CK = new THREE.Group(); CK.position.set(-.27, .03, 0); CK.rotation.y = -.25; S3.add(CK);   // 全雞
+  const cb2 = new THREE.Mesh(new THREE.SphereGeometry(.12, 18, 14), skinC); cb2.scale.set(1.3, .78, 1); cb2.position.y = .09; CK.add(cb2);
+  [-1, 1].forEach(s => {
+    const wing = new THREE.Mesh(new THREE.SphereGeometry(.07, 12, 8), skinC); wing.scale.set(1.3, .5, .6); wing.position.set(-.01, .12, s * .1); CK.add(wing);
+    const thigh = new THREE.Mesh(new THREE.SphereGeometry(.055, 12, 8), skinC); thigh.scale.set(1.3, .8, .9); thigh.position.set(-.1, .07, s * .085); CK.add(thigh);
+    const foot = new THREE.Mesh(new THREE.CylinderGeometry(.01, .012, .09, 6), rtMat('#e8b060', .4)); foot.rotation.z = Math.PI / 2; foot.position.set(-.18, .05, s * .07); CK.add(foot);
+  });
+  const neckC = new THREE.CatmullRomCurve3([V(.12, .1, 0), V(.18, .16, 0), V(.19, .24, 0)]);
+  CK.add(new THREE.Mesh(new THREE.TubeGeometry(neckC, 8, .025, 8), skinC));
+  const ch2 = new THREE.Mesh(new THREE.SphereGeometry(.035, 12, 10), skinC); ch2.position.set(.2, .26, 0); CK.add(ch2);
+  const comb = new THREE.Mesh(new THREE.BoxGeometry(.04, .03, .008), rtMat('#c8282a', .45)); comb.position.set(.2, .295, 0); CK.add(comb);
+  const beak = new THREE.Mesh(new THREE.ConeGeometry(.01, .03, 6), rtMat('#e09a30', .4)); beak.rotation.z = -Math.PI / 2; beak.position.set(.24, .255, 0); CK.add(beak);
+  const layer = boardTexture(128, 64, (g, W, Hh) => { const bands = [['#c88a50', 8], ['#f6ecdc', 10], ['#c86a5a', 12], ['#f4e6d4', 8], ['#b85a4a', 14], ['#f0e0cc', 6], ['#b8584a', 6]]; let y = 0; bands.forEach(([c4, h]) => { g.fillStyle = c4; g.fillRect(0, y, W, h); y += h; }); });
+  const lay = new THREE.MeshStandardMaterial({ map: layer, roughness: .45 }), skinP = rtMat('#d8a06a', .35);
+  const pork = new THREE.Mesh(new THREE.BoxGeometry(.24, .11, .18), [lay, lay, skinP, lay, lay, lay]); pork.position.set(.04, .03 + .055, 0); S3.add(pork);   // 三層肉
+  const FS = new THREE.Group(); FS.position.set(.33, .03, 0); FS.rotation.y = Math.PI / 2; S3.add(FS);   // 全魚
+  const fishM = new THREE.MeshStandardMaterial({ color: '#b8823a', roughness: .3, metalness: .1 });
+  const fb = new THREE.Mesh(new THREE.SphereGeometry(1, 20, 12), fishM); fb.scale.set(.15, .05, .045); fb.position.y = .045; FS.add(fb);
+  const tailS = new THREE.Shape(); tailS.moveTo(0, 0); tailS.lineTo(.08, .05); tailS.lineTo(.065, 0); tailS.lineTo(.08, -.05); tailS.closePath();
+  const tail = new THREE.Mesh(new THREE.ShapeGeometry(tailS), new THREE.MeshStandardMaterial({ color: '#9a6a2a', side: THREE.DoubleSide, roughness: .4 })); tail.position.set(.14, .045, 0); FS.add(tail);
+  const fin = new THREE.Mesh(new THREE.ConeGeometry(.03, .06, 3), fishM); fin.position.set(0, .1, 0); fin.scale.z = .2; FS.add(fin);
+  [-1, 1].forEach(s => { const eye = new THREE.Mesh(new THREE.SphereGeometry(.009, 8, 6), rtMat('#f4f1ea', .2)); eye.position.set(-.11, .055, s * .03); FS.add(eye); });
+  const redP = new THREE.Mesh(new THREE.PlaneGeometry(.05, .12), new THREE.MeshStandardMaterial({ color: '#e8261c', side: THREE.DoubleSide })); redP.rotation.x = -Math.PI / 2; redP.position.set(.04, .142, 0); S3.add(redP);   // 豬肉貼紅紙
+  G.sanxing = [at(0, -.66, S3)];
+  // 發粿插春（三杯）＋香爐插春
+  const chunTex = cxChunTex();
+  const cupTex = boardTexture(256, 64, (g, W, Hh) => { g.fillStyle = '#fbfaf5'; g.fillRect(0, 0, W, Hh); g.fillStyle = '#5ab84a'; g.fillRect(0, Hh - 18, W, 18); ['#e8261c', '#2a7ad8', '#f2c230', '#d84a9a'].forEach((c5, i) => { g.fillStyle = c5; g.beginPath(); g.arc(30 + i * 62, 24, 12, 0, 7); g.fill(); }); });
+  const cupM = new THREE.MeshStandardMaterial({ map: cupTex, roughness: .6, side: THREE.DoubleSide }), cakeM = rtMat('#b07438', .75);
+  G.chun = [-1.6, -1.27, -.94].map((x, i) => {
+    const F = new THREE.Group();
+    const cup = new THREE.Mesh(new THREE.CylinderGeometry(.065, .048, .11, 18, 1, true), cupM); cup.position.y = .055; F.add(cup);
+    const bot = new THREE.Mesh(new THREE.CircleGeometry(.048, 16), rtMat('#f4f1ea')); bot.rotation.x = -Math.PI / 2; bot.position.y = .002; F.add(bot);
+    for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2 + i, cb3 = new THREE.Mesh(new THREE.SphereGeometry(.04, 12, 10), cakeM); cb3.scale.y = .8; cb3.position.set(Math.cos(a) * .022, .125, Math.sin(a) * .022); F.add(cb3); }   // 發粿裂開三瓣
+    const fg2 = cxChunFlag(chunTex); fg2.position.y = .1; fg2.rotation.z = (i - 1) * .12; F.add(fg2);
+    return at(x, -.66, F);
+  });
+  censers.forEach((cs, i) => { const fg3 = cxChunFlag(chunTex, 1.25); fg3.position.set(cs.position.x + (i ? .12 : .1), TY + .26 * cs.scale.x, cs.position.z + .05); fg3.visible = false; D.add(fg3); G.chun.push(fg3); });
+
+  // 照明
+  const l1 = new THREE.PointLight('#ffe2c0', 2.6, 14, 1); l1.position.set(0, 4.5, 1.8); D.add(l1);
+  const l2 = new THREE.PointLight('#fff0d8', 1.6, 6, 1); l2.position.set(0, 2.4, -.2); D.add(l2);
+  H.origin = D.position.clone();
+  addBellDrum(D, H);
+  tMax.x = Math.max(tMax.x, ox + 7); tMin.y = Math.min(tMin.y, oy - 2);
+}
+function cxView(kind) {   // 下方有面板：主體放在畫面上半
+  if (kind === 'table') return [dzW(.15, 2.45, 1.55), dzW(0, .75, -1.15)];
+  if (kind === 'altar') return [dzW(.25, 2.35, 1.6), dzW(0, 1.6, -2.4)];
+  if (kind === 'shrine') return [dzW(0, 2.75, 2.1), dzW(0, 2.4, -2.9)];
+  return [dzW(0, 2.9, 7.4), dzW(0, 1.4, -1.6)];   // 入廳
+}
+function cxShow(k, anim, delay = 0) {
+  const now = performance.now();
+  (CX.groups[k] || []).forEach((o, i) => {
+    o.visible = true;
+    if (anim) { o.scale.setScalar(.01); CX.pop.push({ o, t0: now + delay + i * 160 }); } else o.scale.setScalar(1);
+  });
+}
+function tickChuxi(now) {
+  for (let i = CX.pop.length - 1; i >= 0; i--) {
+    const p = CX.pop[i], k = Math.min(1, Math.max(0, (now - p.t0) / 550)), c1 = 1.70158, c3 = c1 + 1;
+    p.o.scale.setScalar(Math.max(.01, k <= 0 ? .01 : 1 + c3 * Math.pow(k - 1, 3) + c1 * Math.pow(k - 1, 2)));
+    if (k >= 1) { p.o.scale.setScalar(1); CX.pop.splice(i, 1); }
+  }
+}
+const cxPlaced = () => CX_STEPS.every(([k]) => (CX.groups[k] || []).every(o => o.visible));
+function cxDaysTo() {   // 距離除夕幾天（農曆正月初一的前一天）
+  for (let i = 0; i < 400; i++) { const l = lunarMD(twDay(i + 1).date); if (l && l.m === 1 && l.d === 1 && !l.leap) return i; }
+  return null;
+}
+function cxDoneToday() {
+  const day = twDay().s;
+  return (RITE.state.recent || []).some(r => r.name && r.name.includes('除夕') && new Date(r.at + 8 * 3600e3).toISOString().slice(0, 10) === day);
+}
+function cxUI() {
+  const el = document.getElementById('cxBox'), n = cxDaysTo();
+  el.querySelector('.sub').textContent = n === 0 ? '今日除夕・闔家圍爐 敬祀歷代祖先' : n ? `距離除夕還有 ${n} 天（${nextSolarDate(n)}）・隨時可演練祭祖` : '曾氏歷代祖考妣・佛光普照';
+  el.querySelectorAll('.steps li').forEach((li, i) => { li.classList.toggle('on', i === CX.step); li.classList.toggle('done', CX.step > i || CX.step === 9); });
+  el.querySelector('.go').textContent = CX.busy ? '祭祖進行中…' : CX.step === 9 ? '再祭一次' : '開始祭祖';
+  el.querySelector('.go').disabled = CX.busy;
+}
+function cxSetStep(i) { CX.step = i; cxUI(); }
+async function cxPlace(quick) {
+  const cap = document.getElementById('bowCap');
+  await flyTo(cxView('table'), 1.3);
+  for (const [k, label] of CX_STEPS) {
+    if ((CX.groups[k] || []).every(o => o.visible)) continue;
+    cap.textContent = `擺供品・${label}`; cap.classList.add('on');
+    cxShow(k, true); await sleep(quick ? 500 : 1300);
+  }
+  cap.classList.remove('on');
+}
+async function cxCeremony() {
+  if (CX.busy || bdBusy || bowing) return;
+  const who = await getWho(); if (who === null) return;
+  const box = document.getElementById('cxBox'), cap = document.getElementById('bowCap');
+  CX.busy = true; box.classList.remove('on'); controls.enabled = false;
+  try {
+    // 一、擺供品
+    cxSetStep(0); await cxPlace(false);
+    cap.textContent = '供品齊備・鮮花素果 糖果 飲料 三牲'; cap.classList.add('on');
+    await flyTo([dzW(0, 2.2, 3.4), dzW(0, 1.1, -1.4)], 1.4); await sleep(900);
+    // 二、上供祈福：鐘鼓齊鳴
+    cxSetStep(1);
+    cap.textContent = '上供祈福・恭請曾氏歷代祖先'; await sleep(1800); cap.classList.remove('on');
+    await ringCeremony(false);
+    // 三、上香三拜（祖先爐、佛爐各插三炷新香）
+    cxSetStep(2); controls.enabled = false;
+    await flyTo(cxView('altar'), 1.3);
+    cap.textContent = '點香・敬告祖先'; cap.classList.add('on');
+    const H = HS.chuxi;
+    H.censers.forEach(cs => { const p = cs.localToWorld(new THREE.Vector3(0, .29, .05)); plantIncense(p.x, p.y, p.z, 600e3, cs.scale.x); });
+    await sleep(1400); cap.classList.remove('on');
+    await bowThree();
+    // 四、祈福圓滿
+    cxSetStep(3);
+    await flyTo([dzW(.3, 2.5, 3.2), dzW(0, 2.1, -2.2)], 1.2);
+    CX_WISHES.forEach((w, i) => setTimeout(() => blessFx(w), i * 900));
+    await cxRecord(who);
+    await sleep(CX_WISHES.length * 900 + 3000);
+    toast('除夕祭祖圓滿・祖德流芳 闔家團圓');
+    cxSetStep(9);
+  } finally {
+    cap.classList.remove('on'); CX.busy = false; controls.enabled = true; cxUI();
+    box.classList.add('on'); flyTo(cxView('enter'), 1.6);
+  }
+}
+async function cxRecord(who) {   // 記入祭祀紀錄：歷代祖先（主香案同步顯示花果茶香）
+  const types = ['flower', 'fruit', 'tea', 'incense'], st = RITE.state, day = twDay().s, name = '歷代祖先・除夕祭祖';
+  st.od = st.od || {};
+  if (st.od[day] && typeof Object.values(st.od[day])[0] === 'number') st.od[day] = { all: st.od[day] };
+  st.od[day] = st.od[day] || {}; const o = st.od[day].all = st.od[day].all || {};
+  types.forEach(t => { if (t === 'incense') { st.total = (st.total || 0) + 1; st.days[day] = (st.days[day] || 0) + 1; st.byPid.all = (st.byPid.all || 0) + 1; } o[t] = (o[t] || 0) + 1; });
+  st.recent = [{ pid: 'all', name, who: who || '族人', type: types[0], types, at: Date.now() }, ...(st.recent || [])].slice(0, 40);
+  refreshOfferings();
+  if (RITE.online) {
+    try {
+      const r = await riteFetch('/offer', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ pid: 'all', name, who: who || '族人', types }) });
+      if (r && r.state) { RITE.state = { ...RITE.state, ...r.state }; refreshOfferings(); }
+    } catch (e) { RITE.online = false; saveLocal(); }
+  } else saveLocal();
+}
+function openChuxi() {
+  HK = 'chuxi'; DZ = HS.chuxi;
+  stopTour(); closeCard(); buildChuxi();
+  ['routeBox', 'dzBox', 'scrollReader', 'offerBox', 'pilBox', 'charBox'].forEach(id => { const e = document.getElementById(id); if (e) e.classList.remove('on'); });
+  document.body.classList.remove('route'); document.body.classList.add('dizang');
+  controls.minDistance = .5; controls.minPolarAngle = .05;
+  if (cxDoneToday()) { CX_STEPS.forEach(([k]) => cxShow(k, false)); if (CX.step < 0) CX.step = 9; }
+  cxUI(); document.getElementById('cxBox').classList.add('on');
+  setGen(0); flyTo(cxView('enter'), 2.2);
+}
+function closeChuxi() {
+  if (CX.busy) return;
+  stopChant(); document.getElementById('sutra').classList.remove('on');
+  document.body.classList.remove('dizang'); document.getElementById('cxBox').classList.remove('on');
+  controls.minDistance = 3; controls.minPolarAngle = Math.PI * 0.22; flyTo(overviewView(), 1.6);
+}
+(() => {
+  const el = document.getElementById('cxBox');
+  el.querySelector('.go').onclick = cxCeremony;
+  el.querySelector('.ofr').onclick = async () => { if (CX.busy) return; CX.busy = true; cxUI(); try { await cxPlace(false); } finally { CX.busy = false; cxUI(); } };
+  el.querySelector('.bd').onclick = () => { if (!CX.busy) ringCeremony(true); };
+  el.querySelector('.see').onclick = () => flyTo(cxView('table'), 1.2);
+  el.querySelector('.alt').onclick = () => flyTo(cxView('shrine'), 1.3);
+  el.querySelector('.chn').onclick = () => { openSutra('all'); flyTo([dzW(.2, 2.7, 3.6), dzW(0, 2.2, -2.6)], 1.4); };
+  el.querySelector('.x').onclick = closeChuxi;
+})();
 
 /* ================= 祈福之旅：選角色 → 台61下交流道 → 停車 → 入殿上香三拜 → 祈福 ================= */
 const CHARS = {
@@ -3971,6 +4562,7 @@ function buildBar() {
   mk('全覽', () => { stopTour(); closeCard(); setGen(0); flyTo(overviewView(), 1.4); });
   mk('導覽', () => { closeCard(); tour(); });
   mk('祭祀', () => { stopTour(); closeCard(); openRitePanel(); });
+  mk('除夕', openChuxi);
   mk('掃墓', openRoute);
   mk('塔位', openTowerPick);
   mk('沿革', () => { stopTour(); closeCard(); openHistory(); });
@@ -4312,7 +4904,7 @@ function loop() {
   }
   chantAudioTick();
   tickRoute(now, dt); tickPilgrim(now, dt); tickFountain(dt, now);
-  tickEmbers(T, dt); tickBellDrum(dt);
+  tickEmbers(T, dt); tickBellDrum(dt); tickChuxi(now);
   if (steleFront) { steleFront.emissiveIntensity = .05 + .04 * Math.sin(T * 1.3); steleHalo.material.opacity = .42 + .12 * Math.sin(T * 1.3); }
   for (const id in tablets) {
     const t = tablets[id], goal = t.flip * Math.PI;
