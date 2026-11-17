@@ -3273,8 +3273,8 @@ const CX_TXT = '曾氏歷代祖考妣之神位百代孝慈高仰止千年支派�
 HS.chuxi = { built: false };
 const CX = { busy: false, groups: {}, pop: [], step: -1 };
 const CX_STEPS = [
-  ['flower', '鮮花一對'], ['fruit', '素果三盤・蘋果 橘子 鳳梨'], ['candy', '糖果五盤'],
-  ['drink', '飲料・汽水 果汁 烏龍茶 米酒'], ['sanxing', '三牲・雞 豬肉 魚'], ['chun', '發粿插春・年年發'],
+  ['flower', '鮮花一對'], ['fruit', '素果三盤・蘋果 橘子 鳳梨＋餅乾'], ['candy', '糖果五盤'],
+  ['drink', '飲料・汽水 果汁 烏龍茶 米酒'], ['sanxing', '三牲・雞 豬肉 魚'], ['chun', '發粿插春・年年發（共十盤）'],
 ];
 const CX_WISHES = ['闔家團圓', '祖先庇佑', '新年如意', '歲歲平安'];
 
@@ -3382,6 +3382,64 @@ function cxDrawerTex(n, shou, TW = 2048, TH = 160) {   // 神桌抽屜面：兩�
 }
 
 /* ---------- 供品元件 ---------- */
+function cxMound(P, geo, mat, { R, sp, h, layers, seed, colors, tilt = .3 }) {   // 在盤中密鋪成小山（六角密排、逐層內縮）
+  const pts = [], rnd = mulberry32(seed);
+  for (let L = 0; L < layers; L++) {
+    const rL = R * (1 - L / (layers + .5)), off = (L % 2) * sp / 2;
+    for (let iy = -12; iy <= 12; iy++) for (let ix = -12; ix <= 12; ix++) {
+      const x = (ix + (iy % 2 ? .5 : 0)) * sp + off, z = iy * sp * .866 + off * .577;
+      if (Math.hypot(x, z) <= rL) pts.push([x + (rnd() - .5) * sp * .2, .024 + h * (L + .5) + rnd() * h * .15, z + (rnd() - .5) * sp * .2]);
+    }
+  }
+  const im = new THREE.InstancedMesh(geo, mat, pts.length), o = new THREE.Object3D(), col = new THREE.Color();
+  pts.forEach(([x, y, z], i) => { o.position.set(x, y, z); o.rotation.set((rnd() - .5) * tilt, rnd() * 6.28, (rnd() - .5) * tilt); o.updateMatrix(); im.setMatrixAt(i, o.matrix); if (colors) im.setColorAt(i, col.set(colors[Math.floor(rnd() * colors.length)])); });
+  P.add(im); return pts;
+}
+function cxFruitMound(P, r, mat) {   // 水果疊塔：底層 7（中心＋六顆一圈）、中層 3、頂 1
+  const y0 = .022 + r * .86, d = r * 1.96, pos = [[0, y0, 0]];
+  for (let k = 0; k < 6; k++) pos.push([Math.cos(k * Math.PI / 3) * d, y0, Math.sin(k * Math.PI / 3) * d]);
+  for (let k = 0; k < 3; k++) { const a = Math.PI / 6 + k * Math.PI * 2 / 3; pos.push([Math.cos(a) * d / 1.732, y0 + r * 1.55, Math.sin(a) * d / 1.732]); }
+  pos.push([0, y0 + r * 3.05, 0]);
+  return pos.map(([x, y, z], i) => { const s = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), mat); s.scale.y = .9; s.position.set(x, y, z); s.rotation.y = i * 1.3; P.add(s); return s; });
+}
+function cxOrchid(D, sx, TY, om) {   // 蝴蝶蘭一盆：寬葉七片、三枝花梗向內拱，花朵成串
+  const px = sx * 1.66, pz = -2.36;
+  const pot = lathe([[0, 0], [.14, 0], [.17, .3], [.16, .31], [0, .29]], new THREE.MeshStandardMaterial({ color: '#f6f4ef', roughness: .3 }), 24); pot.position.set(px, TY, pz); D.add(pot);
+  const moss = new THREE.Mesh(new THREE.CircleGeometry(.155, 16), rtMat('#6a5a3a', .95)); moss.rotation.x = -Math.PI / 2; moss.position.set(px, TY + .3, pz); D.add(moss);
+  for (let i = 0; i < 7; i++) {
+    const a = i / 7 * Math.PI * 2 + .3, lf = new THREE.Mesh(new THREE.SphereGeometry(.22, 14, 8), om.leaf);
+    lf.scale.set(1, .09, .4); lf.position.set(px + Math.cos(a) * .15, TY + .34 + (i % 2) * .03, pz + Math.sin(a) * .12); lf.rotation.set(0, -a, -.35); D.add(lf);
+  }
+  const P = (x, y, z) => V(sx * x, TY + y, z);
+  const spikes = [
+    [P(1.66, .3, pz), P(1.6, 1.5, -2.34), P(1.25, 2.55, -2.3), P(.65, 2.95, -2.26), P(.12, 2.88, -2.22)],
+    [P(1.64, .3, pz), P(1.62, 1.2, -2.3), P(1.38, 2.05, -2.22), P(1.0, 2.32, -2.16), P(.66, 2.2, -2.12)],
+    [P(1.68, .3, pz), P(1.74, .95, -2.26), P(1.78, 1.55, -2.16), P(1.62, 1.92, -2.08), P(1.42, 1.86, -2.04)],
+  ].map(pts => new THREE.CatmullRomCurve3(pts));
+  const flowers = [];
+  spikes.forEach((c, si) => {
+    D.add(new THREE.Mesh(new THREE.TubeGeometry(c, 48, .009, 5), om.stem));
+    const n = [11, 9, 7][si];
+    for (let i = 0; i < n; i++) {
+      const t = .42 + i / (n - 1) * .58, p = c.getPoint(t);
+      if (i >= n - 2) { const bud = new THREE.Mesh(new THREE.SphereGeometry(i === n - 1 ? .018 : .026, 8, 6), rtMat('#c84aa8', .5)); bud.position.copy(p).add(V(0, -.03, .02)); D.add(bud); continue; }
+      flowers.push({ p: p.clone().add(V(0, -.075, .05)), s: 1 - i / n * .3, ry: (i % 2 ? .25 : -.25) * sx });
+    }
+  });
+  const petals = new THREE.InstancedMesh(new THREE.CircleGeometry(.05, 14), new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: .5, side: THREE.DoubleSide }), flowers.length * 5);
+  const lips = new THREE.InstancedMesh(new THREE.CircleGeometry(.022, 10), new THREE.MeshStandardMaterial({ color: '#fff2c0', roughness: .5, side: THREE.DoubleSide }), flowers.length);
+  const o = new THREE.Object3D(), col = new THREE.Color(), shades = ['#b0279e', '#c23aac', '#9c1f8e', '#b8389c'];
+  const PET = [[Math.PI / 2, .75, .62], [Math.PI * .08, 1.1, .95], [Math.PI * .92, 1.1, .95], [Math.PI * 1.3, .72, .58], [Math.PI * 1.7, .72, .58]];   // [方向, 長, 寬]：上萼、兩側大花瓣、兩下萼
+  flowers.forEach((f, fi) => {
+    PET.forEach(([a, l, w], k) => {
+      o.position.copy(f.p).add(V(Math.cos(a) * .042 * l * f.s, Math.sin(a) * .042 * l * f.s, k === 1 || k === 2 ? .004 : 0));
+      o.rotation.set(0, f.ry, a); o.scale.set(l * f.s, w * f.s, 1); o.updateMatrix();
+      petals.setMatrixAt(fi * 5 + k, o.matrix); petals.setColorAt(fi * 5 + k, col.set(shades[(fi + k) % shades.length]));
+    });
+    o.position.copy(f.p).add(V(0, -.012, .012)); o.rotation.set(0, f.ry, 0); o.scale.setScalar(f.s); o.updateMatrix(); lips.setMatrixAt(fi, o.matrix);
+  });
+  D.add(petals); D.add(lips);
+}
 function cxPile(G, n, r, h, make, seed) {   // 在盤中堆成兩層
   const rnd = mulberry32(seed);
   for (let i = 0; i < n; i++) {
@@ -3557,17 +3615,8 @@ function buildChuxi() {
   const slL = new THREE.PointLight('#ff8a40', 1.3, 4, 1.4); slL.position.y = .45; SL.add(slL);
   // 佛珠（粉色水晶）
   for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, b = new THREE.Mesh(new THREE.SphereGeometry(.022, 8, 6), rtMat(i % 5 ? '#e8a8b0' : '#5a3a2a', .2)); b.position.set(1.55 + Math.cos(a) * .09, TY + .025, -2.45 + Math.sin(a) * .06); D.add(b); }
-  // 蝴蝶蘭（左側盆栽，花梗拱過神龕上方）
-  const pot = lathe([[0, 0], [.14, 0], [.17, .3], [.16, .31], [0, .29]], new THREE.MeshStandardMaterial({ color: '#f6f4ef', roughness: .3 }), 24); pot.position.set(-1.66, TY, -2.36); D.add(pot);
-  for (let i = 0; i < 4; i++) { const lf2 = new THREE.Mesh(new THREE.SphereGeometry(.2, 12, 8), om.leaf); lf2.scale.set(1, .12, .45); lf2.position.set(-1.66 + Math.cos(i * 1.6) * .13, TY + .36, -2.36 + Math.sin(i * 1.6) * .1); lf2.rotation.set(0, -i * 1.6, (i % 2 ? .4 : -.4)); D.add(lf2); }
-  const stemC = new THREE.CatmullRomCurve3([V(-1.66, TY + .3, -2.36), V(-1.55, TY + 1.6, -2.4), V(-1.2, TY + 2.65, -2.4), V(0, TY + 2.95, -2.3), V(1.0, TY + 2.75, -2.3), V(1.4, TY + 2.55, -2.3)]);
-  D.add(new THREE.Mesh(new THREE.TubeGeometry(stemC, 40, .01, 5), om.stem));
-  const orchM = new THREE.MeshStandardMaterial({ color: '#a8279a', roughness: .5, side: THREE.DoubleSide }), lipM = new THREE.MeshStandardMaterial({ color: '#f2e0f0', roughness: .5, side: THREE.DoubleSide });
-  [.84, .9, .96, 1].forEach((t, i) => {
-    const p = stemC.getPoint(t), F = new THREE.Group(); F.position.copy(p).add(V(0, -.06, .05)); F.scale.setScalar(1 - i * .08); D.add(F);
-    for (let k = 0; k < 5; k++) { const pt = new THREE.Mesh(new THREE.CircleGeometry(.07, 12), k < 2 ? orchM : orchM); pt.scale.set(k < 2 ? 1.1 : .55, k < 2 ? .9 : 1, 1); const a = k / 5 * Math.PI * 2; pt.position.set(Math.cos(a) * .06, Math.sin(a) * .06, 0); F.add(pt); }
-    const lip = new THREE.Mesh(new THREE.CircleGeometry(.03, 10), lipM); lip.position.z = .005; F.add(lip);
-  });
+  // 蝴蝶蘭：左右各一盆，茂密對稱，花梗拱過神龕上方
+  [-1, 1].forEach(sx => cxOrchid(D, sx, TY, om));
   // 水晶蓮花燈
   const crystal = new THREE.MeshStandardMaterial({ color: '#ffd58a', emissive: '#ffb040', emissiveIntensity: .7, transparent: true, opacity: .75, roughness: .05 });
   [-1.55, 1.58].forEach(x => {
@@ -3611,31 +3660,29 @@ function buildChuxi() {
     }
     return at(x, -1.5, F);
   });
-  // 素果三盤：蘋果（平安）、橘子（大吉）、鳳梨（旺來）
-  const lacRed = new THREE.MeshStandardMaterial({ color: '#a8161a', roughness: .3, side: THREE.DoubleSide });
-  const fruitPile = (mat, r, n, seed) => { const P = new THREE.Group(); cxPile(P, n, .1, r * .95, () => { const s = new THREE.Mesh(new THREE.SphereGeometry(r, 16, 12), mat); s.scale.y = .9; return s; }, seed); return P; };
-  const apple = cxCompote(lacRed, M.gold); const ap = fruitPile(om.apple, .058, 6, 3); ap.position.y = .17; apple.add(ap);
-  ap.children.forEach(a => { const st3 = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, .03, 4), rtMat('#5a3a1a')); st3.position.set(a.position.x, a.position.y + .055, a.position.z); ap.add(st3); });
-  const orange = cxCompote(lacRed, M.gold); const orp = fruitPile(om.orange, .055, 7, 5); orp.position.y = .17; orange.add(orp);
-  const top1 = orp.children.reduce((m, o) => o.position.y > m.position.y ? o : m); const olf = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), om.leaf); olf.scale.set(1, .2, .5); olf.position.copy(top1.position).add(V(.015, .05, 0)); orp.add(olf);
-  const pine = cxCompote(lacRed, M.gold);
+  // 白瓷荷花盤共十盤：後排 素果三盤＋餅乾、中排 糖果五盤、前排 發粿
+  const plateTex = cxPlateTex(), gold2 = new THREE.MeshStandardMaterial({ color: '#e8b830', metalness: .85, roughness: .25 });
+  const apple = cxPlate(.2, plateTex, porc); cxFruitMound(apple, .06, om.apple).forEach(a => { const st3 = new THREE.Mesh(new THREE.CylinderGeometry(.004, .004, .03, 4), rtMat('#5a3a1a')); st3.position.copy(a.position).add(V(0, .055, 0)); apple.add(st3); });
+  const orange = cxPlate(.2, plateTex, porc); const ors = cxFruitMound(orange, .057, om.orange);
+  const olf = new THREE.Mesh(new THREE.SphereGeometry(.03, 8, 6), om.leaf); olf.scale.set(1, .2, .5); olf.position.copy(ors.at(-1).position).add(V(.015, .052, 0)); orange.add(olf);
+  const pine = cxPlate(.2, plateTex, porc);
   const pineTex = boardTexture(128, 128, (g, W, Hh) => { g.fillStyle = '#c88a2a'; g.fillRect(0, 0, W, Hh); g.strokeStyle = '#6a4210'; g.lineWidth = 3; for (let i = -W; i < W * 2; i += 16) { g.beginPath(); g.moveTo(i, 0); g.lineTo(i + Hh, Hh); g.stroke(); g.beginPath(); g.moveTo(i + Hh, 0); g.lineTo(i, Hh); g.stroke(); } g.fillStyle = '#e8b040'; for (let x = 8; x < W; x += 16) for (let y = 8; y < Hh; y += 16) { g.beginPath(); g.arc(x, y, 3, 0, 7); g.fill(); } });
   pineTex.wrapS = pineTex.wrapT = THREE.RepeatWrapping; pineTex.repeat.set(3, 2);
-  const pb = new THREE.Mesh(new THREE.SphereGeometry(.1, 20, 14), new THREE.MeshStandardMaterial({ map: pineTex, roughness: .7 })); pb.scale.y = 1.45; pb.position.y = .17 + .13; pine.add(pb);
-  for (let i = 0; i < 11; i++) { const a = i / 11 * Math.PI * 2, cr = new THREE.Mesh(new THREE.ConeGeometry(.018, .2 + (i % 3) * .04, 4), rtMat('#3f7a2a', .6)); cr.position.set(Math.cos(a) * .025, .17 + .27 + .08, Math.sin(a) * .025); cr.rotation.set(Math.sin(a) * .45, 0, -Math.cos(a) * .45); pine.add(cr); }
-  G.fruit = [at(-.95, -1.5, apple), at(0, -1.5, orange), at(.95, -1.5, pine)];
-  // 糖果五盤（荷花白瓷盤）
-  const plateTex = cxPlateTex(), gold2 = new THREE.MeshStandardMaterial({ color: '#e8b830', metalness: .85, roughness: .25 });
-  const candyCols = ['#e8261c', '#2a7ad8', '#f2c230', '#3aa84a', '#d84a9a', '#f07a1a'];
-  const candies = [
-    (i, r) => { const c3 = new THREE.Mesh(new THREE.CylinderGeometry(.022, .022, .007, 16), gold2); c3.rotation.set((r() - .5) * .5, 0, (r() - .5) * .5); return c3; },   // 金幣巧克力
-    (i, r) => { const C = new THREE.Group(), m2 = rtMat(candyCols[i % candyCols.length], .25); const b = new THREE.Mesh(new THREE.SphereGeometry(.018, 10, 8), m2); b.scale.x = 1.4; C.add(b); [-1, 1].forEach(s => { const w2 = new THREE.Mesh(new THREE.ConeGeometry(.014, .022, 6), m2); w2.rotation.z = s * Math.PI / 2; w2.position.x = s * .035; C.add(w2); }); return C; },   // 彩色包裝糖
-    () => new THREE.Mesh(new THREE.BoxGeometry(.055, .018, .035), rtMat('#c8954a', .7)),   // 花生糖
-    () => { const m2 = new THREE.Mesh(new THREE.BoxGeometry(.032, .022, .032), [rtMat('#f6f2e6', .5), rtMat('#f6f2e6', .5), rtMat('#2a5ab8', .5), rtMat('#f6f2e6', .5), rtMat('#f6f2e6', .5), rtMat('#f6f2e6', .5)]); return m2; },   // 牛奶糖
-    () => new THREE.Mesh(new THREE.BoxGeometry(.075, .02, .02), rtMat('#f4f0e2', .95)),   // 冬瓜糖
+  const pb = new THREE.Mesh(new THREE.SphereGeometry(.15, 22, 16), new THREE.MeshStandardMaterial({ map: pineTex, roughness: .7 })); pb.scale.set(1, 1.25, 1); pb.position.y = .022 + .17; pine.add(pb);
+  for (let i = 0; i < 14; i++) { const a = i / 14 * Math.PI * 2, cr = new THREE.Mesh(new THREE.ConeGeometry(.02, .22 + (i % 3) * .05, 4), rtMat('#3f7a2a', .6)); cr.position.set(Math.cos(a) * .03, .022 + .35 + .09, Math.sin(a) * .03); cr.rotation.set(Math.sin(a) * .5, 0, -Math.cos(a) * .5); pine.add(cr); }
+  const cookie = cxPlate(.2, plateTex, porc);   // 餅乾（小包裝圓餅，堆滿）
+  cxMound(cookie, new THREE.CylinderGeometry(.04, .04, .014, 18), rtMat('#e2bc78', .6), { R: .15, sp: .078, h: .016, layers: 4, seed: 77, tilt: .5, colors: ['#ffffff', '#ffe0b0', '#ffd0c8', '#fff2c8'] });
+  G.fruit = [at(-.93, -1.5, apple), at(-.31, -1.5, orange), at(.31, -1.5, pine), at(.93, -1.5, cookie)];
+  // 糖果五盤：金幣巧克力、彩色包裝糖、花生糖、牛奶糖、冬瓜糖（各自密鋪成小山）
+  const white = new THREE.MeshStandardMaterial({ color: '#ffffff', roughness: .25 });
+  const CANDY = [
+    [new THREE.CylinderGeometry(.021, .021, .006, 16), gold2, { sp: .04, h: .009, layers: 5, tilt: .7 }],
+    [new THREE.CapsuleGeometry(.014, .024, 4, 10).rotateZ(Math.PI / 2), white, { sp: .036, h: .026, layers: 4, colors: ['#e8261c', '#2a7ad8', '#f2c230', '#3aa84a', '#d84a9a', '#f07a1a'] }],
+    [new THREE.BoxGeometry(.05, .016, .034), rtMat('#c8954a', .7), { sp: .045, h: .018, layers: 4, tilt: .5 }],
+    [new THREE.BoxGeometry(.03, .02, .03), white, { sp: .033, h: .022, layers: 4, colors: ['#f6f2e6', '#f6f2e6', '#d8e4f6'] }],
+    [new THREE.BoxGeometry(.065, .018, .018), rtMat('#f4f0e2', .95), { sp: .036, h: .02, layers: 4, tilt: .4 }],
   ];
-  const cN = [14, 11, 7, 10, 8], cH = [.008, .02, .018, .022, .02];
-  G.candy = [-1.44, -.72, 0, .72, 1.44].map((x, i) => { const P = cxPlate(.17, plateTex, porc); const pile = new THREE.Group(); pile.position.y = .02; cxPile(pile, cN[i], .1, cH[i], candies[i], 60 + i); P.add(pile); return at(x, -1.08, P); });
+  G.candy = [-1.44, -.72, 0, .72, 1.44].map((x, i) => { const P = cxPlate(.17, plateTex, porc); const [geo, mat, o] = CANDY[i]; cxMound(P, geo, mat, { R: .13, seed: 60 + i, ...o }); return at(x, -1.06, P); });
   // 飲料
   G.drink = [['soda', '汽水', '#1f6b3a', '#fff'], ['juice', '果汁', '#f2c230', '#c8401c'], ['tea', '烏龍茶', '#f4f1ea', '#5a3410'], ['wine', '米酒', '#c8161c', '#f6d27a']].map(([k, t, bg, fg], i) => at(.84 + i * .29, -.68, cxBottle(k, cxLabel(t, bg, fg))));
   // 三牲：雞、豬肉、魚（紅漆長盤）
@@ -3673,14 +3720,16 @@ function buildChuxi() {
   const chunTex = cxChunTex();
   const cupTex = boardTexture(256, 64, (g, W, Hh) => { g.fillStyle = '#fbfaf5'; g.fillRect(0, 0, W, Hh); g.fillStyle = '#5ab84a'; g.fillRect(0, Hh - 18, W, 18); ['#e8261c', '#2a7ad8', '#f2c230', '#d84a9a'].forEach((c5, i) => { g.fillStyle = c5; g.beginPath(); g.arc(30 + i * 62, 24, 12, 0, 7); g.fill(); }); });
   const cupM = new THREE.MeshStandardMaterial({ map: cupTex, roughness: .6, side: THREE.DoubleSide }), cakeM = rtMat('#b07438', .75);
-  G.chun = [-1.6, -1.27, -.94].map((x, i) => {
+  const fgPlate = cxPlate(.2, plateTex, porc);
+  [[-.075, .045], [.075, .045], [0, -.085]].forEach(([x, z], i) => {
     const F = new THREE.Group();
     const cup = new THREE.Mesh(new THREE.CylinderGeometry(.065, .048, .11, 18, 1, true), cupM); cup.position.y = .055; F.add(cup);
     const bot = new THREE.Mesh(new THREE.CircleGeometry(.048, 16), rtMat('#f4f1ea')); bot.rotation.x = -Math.PI / 2; bot.position.y = .002; F.add(bot);
     for (let k = 0; k < 3; k++) { const a = k / 3 * Math.PI * 2 + i, cb3 = new THREE.Mesh(new THREE.SphereGeometry(.04, 12, 10), cakeM); cb3.scale.y = .8; cb3.position.set(Math.cos(a) * .022, .125, Math.sin(a) * .022); F.add(cb3); }   // 發粿裂開三瓣
     const fg2 = cxChunFlag(chunTex); fg2.position.y = .1; fg2.rotation.z = (i - 1) * .12; F.add(fg2);
-    return at(x, -.66, F);
+    F.position.set(x, .022, z); fgPlate.add(F);
   });
+  G.chun = [at(-1.25, -.66, fgPlate)];
   censers.forEach((cs, i) => { const fg3 = cxChunFlag(chunTex, 1.25); fg3.position.set(cs.position.x + (i ? .12 : .1), TY + .26 * cs.scale.x, cs.position.z + .05); fg3.visible = false; D.add(fg3); G.chun.push(fg3); });
 
   // 照明
