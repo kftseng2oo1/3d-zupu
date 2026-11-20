@@ -659,29 +659,43 @@ const fmtDate = d => (d || '').trim().replace(/-/g, '.');
    新增的人 → 依「上一代」接到世系；在世者做成家族樹卡片（不立牌位） */
 let MEM = null;
 const MEM_CLOUD_KEY = 'zupu_family_cloud';
-/* 雲端名冊：本機沒有紀念堂資料時，向 arcar /zupu/family 取最新副本，有變動就存起來並重新載入一次 */
+/* 雲端名冊（arcar /zupu/family）與本機紀念堂資料，哪份比較新就用哪份。
+   主畫面 App 與 Safari 儲存分開：在 App 裡點過「紀念堂」會留下一份空白預設名冊（沒有塔位），
+   以前只要本機有資料就不看雲端，造成 Safari 有塔位、App 沒有。 */
+function memPreferCloud(local, cloud) {
+  if (!cloud || !Array.isArray(cloud.ancestors) || !cloud.ancestors.length) return false;
+  if (!local || !Array.isArray(local.ancestors)) return true;
+  const nPl = d => Object.values(d.placements || {}).filter(x => x && x.tower).length;
+  if ((cloud.savedAt || 0) > (local.cloudAt || 0)) return true;          // 雲端有更新的存檔
+  if (nPl(local) === 0 && nPl(cloud) > 0) return true;                   // 本機沒登記任何塔位
+  if (cloud.ancestors.length > local.ancestors.length) return true;      // 本機是較少人的舊／預設名冊
+  return false;
+}
 (async () => {
-  let hasLocal = false; try { hasLocal = !!localStorage.getItem('ancestorApp_v28'); } catch (e) {}
-  if (hasLocal) return;
   try {
     const ctl = new AbortController(); setTimeout(() => ctl.abort(), 8000);
     const r = await fetch('https://arcar.kftseng2oo1.workers.dev/zupu/family?f=longshan', { cache: 'no-store', signal: ctl.signal });
     if (!r.ok) return;
-    const txt = await r.text(); JSON.parse(txt);
+    const txt = await r.text(), cloud = JSON.parse(txt);
+    let local = null; try { local = JSON.parse(localStorage.getItem('ancestorApp_v28') || 'null'); } catch (e) {}
     let old = ''; try { old = localStorage.getItem(MEM_CLOUD_KEY) || ''; } catch (e) {}
-    if (txt === old) return;
-    localStorage.setItem(MEM_CLOUD_KEY, txt);
-    if (sessionStorage.getItem('zupu_cloud_reload')) return;
-    sessionStorage.setItem('zupu_cloud_reload', '1');
-    try { toast('已取得紀念堂最新資料，重新載入中…'); } catch (e) {}
+    if (txt !== old) localStorage.setItem(MEM_CLOUD_KEY, txt);
+    const usingCloud = MEM && MEM._fromCloud;
+    if (!memPreferCloud(local, cloud)) return;
+    if (usingCloud && txt === old) return;   // 已在用這份雲端資料
+    if (sessionStorage.getItem('zupu_cloud_reload') === txt.length + '') return;
+    sessionStorage.setItem('zupu_cloud_reload', txt.length + '');
+    try { toast('已取得紀念堂最新資料（含塔位），重新載入中…'); } catch (e) {}
     setTimeout(() => location.reload(), 900);
   } catch (e) {}
 })();
 (function mergeFromMemorial() {
   let data;
   // 同網域的紀念堂資料優先；沒有時（例如加到主畫面的 App 與 Safari 分開儲存）用雲端名冊副本
+  let cloud = null;
   try { data = JSON.parse(localStorage.getItem('ancestorApp_v28') || 'null'); } catch (e) {}
-  if (!data) try { data = JSON.parse(localStorage.getItem(MEM_CLOUD_KEY) || 'null'); } catch (e) {}
+  try { cloud = JSON.parse(localStorage.getItem(MEM_CLOUD_KEY) || 'null'); } catch (e) {}
+  if (memPreferCloud(data, cloud)) { data = cloud; data._fromCloud = true; }
   if (!data || !Array.isArray(data.ancestors)) return;
   MEM = data;
   const find = n => n && PEOPLE.find(p => !p.spouseOf && norm(p.name) === norm(n));

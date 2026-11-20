@@ -1,6 +1,6 @@
 // 曾氏族譜 3D 祠堂 Service Worker
 // 每次發佈新版請把 CACHE 版號 +1；App 會偵測到新版並提示「軟體更新」
-const CACHE = '3d-zupu-v35';
+const CACHE = '3d-zupu-v36';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
