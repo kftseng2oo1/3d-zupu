@@ -1,6 +1,6 @@
 // 曾氏族譜 3D 祠堂 Service Worker
 // 每次發佈新版請把 CACHE 版號 +1；App 會偵測到新版並提示「軟體更新」
-const CACHE = '3d-zupu-v34';
+const CACHE = '3d-zupu-v35';
 const ASSETS = ['./', './index.html', './manifest.json', './icon.svg', './icon-192.png', './icon-512.png', './apple-touch-icon.png'];
 const CDN = ['cdn.jsdelivr.net', 'fonts.googleapis.com', 'fonts.gstatic.com'];
 
@@ -33,6 +33,15 @@ self.addEventListener('fetch', e => {
   if (url.origin !== location.origin) return;
   // 誦經音檔：iOS 以 Range 分段讀取，交給瀏覽器直接處理，不經快取
   if (/\.mp3$/.test(url.pathname)) return;
+  // 頁面本身（index.html）：連網時一律抓最新（略過 HTTP 快取），離線才用快取
+  //   以前是先給快取，主畫面 App 常常要開兩三次才看到新功能
+  if (req.mode === 'navigate' || /\/(index\.html)?$/.test(url.pathname)) {
+    e.respondWith(fetch(req, { cache: 'no-cache' }).then(res => {
+      if (res.ok) { const c = res.clone(); caches.open(CACHE).then(k => k.put(req, c)); }
+      return res;
+    }).catch(() => caches.match(req).then(hit => hit || caches.match('./index.html'))));
+    return;
+  }
   // 本站檔案：先給快取，背景更新
   e.respondWith(caches.match(req).then(hit => {
     const net = fetch(req).then(res => {
