@@ -16,7 +16,7 @@
  *
  * API（路徑在 /zupu 之後，皆帶 ?f=家族代號）
  *   GET    /state                                   → {ok, state}
- *   POST   /offer     JSON {pid, name, who, types[]} → {ok, state}  types 可複選：incense 上香／tea 奉茶／flower 獻花／fruit 供果／candle 點燭／sutra 誦經（n＝卷數）
+ *   POST   /offer     JSON {pid, name, who, types[]} → {ok, state}  types 可複選：incense 上香／tea 奉茶／flower 獻花／fruit 供果／candle 點燭／sutra 誦經（n＝卷數）／paper 燒金紙（n＝張數）
  *                      （pid = all 為歷代祖先；pid = every＋pids[] 為所有祖先各擺香案；舊版單一 type 仍可用）
  *   POST   /incense   JSON {pid, name, who}         → 同 /offer（type=incense，相容舊版）
  *   POST   /voice?pid=&who=&title=&dur=   原始音訊   → {ok, voice, key, state}
@@ -35,7 +35,8 @@ const ZUPU_MAX_VOICES_PER_PID = 30;
 const ZUPU_RECENT = 40;
 const ZUPU_DAYS_KEEP = 400;
 const ZUPU_OD_KEEP = 30;
-const ZUPU_TYPES = ['incense', 'tea', 'flower', 'fruit', 'candle', 'sutra'];
+const ZUPU_TYPES = ['incense', 'tea', 'flower', 'fruit', 'candle', 'sutra', 'paper'];
+const zN = (type, n) => type === 'sutra' ? Math.max(1, Math.min(108, parseInt(n, 10) || 1)) : type === 'paper' ? Math.max(1, Math.min(9999, parseInt(n, 10) || 1)) : 1;
 
 function withZupuCors(res) {
   const h = new Headers(res.headers);
@@ -91,11 +92,12 @@ async function handleZupu(request, env, path, url) {
       s.od[day][tp] = s.od[day][tp] || {};
       types.forEach(type => {
         if (type === 'incense') { s.total += 1; s.days[day] = (s.days[day] || 0) + 1; s.byPid[tp] = (s.byPid[tp] || 0) + 1; }
-        s.od[day][tp][type] = (s.od[day][tp][type] || 0) + (type === 'sutra' ? Math.max(1, Math.min(108, parseInt(b.n, 10) || 1)) : 1);
+        s.od[day][tp][type] = (s.od[day][tp][type] || 0) + zN(type, b.n);
       });
     });
     const rec = { pid, name: zStr(b.name, 20), who: zStr(b.who, 20) || '族人', type: types[0], types, at: Date.now() };
-    if (types.includes('sutra')) rec.n = Math.max(1, Math.min(108, parseInt(b.n, 10) || 1));
+    if (types.includes('sutra')) rec.n = zN('sutra', b.n);
+    else if (types.includes('paper')) rec.n = zN('paper', b.n);
     s.recent = [rec, ...s.recent].slice(0, ZUPU_RECENT);
     await zSave(kv, f, s);
     return zJson({ ok: true, state: s });
