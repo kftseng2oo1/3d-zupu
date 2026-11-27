@@ -21,8 +21,8 @@ App 開啟、回到前景、每 30 分鐘會自動檢查；有新版時上方跳
 
 ## 祭祀雲端（arcar `/zupu`）
 
-上香紀錄與語音要全家共用，需部署已併入 `/zupu` 的 arcar Worker **v27**（`kftseng2oo1/grandpa` 的 `worker/arcar-worker_v27.js`），並在 arcar 新增 KV 綁定 `ZUPU_KV`。
-`worker/zupu-module.js` 是同一份後端的獨立模組原稿。燒金紙紀錄（type `paper`）需把此模組的 `ZUPU_TYPES`／`zN` 同步到 arcar；舊版後端不認得時只記在本機，其他雲端功能不受影響。
+上香紀錄與語音要全家共用，需部署已併入 `/zupu` 的 arcar Worker **v30**（`kftseng2oo1/grandpa` 的 `worker/arcar-worker_v30.js`，含燒金紙紀錄），並在 arcar 新增 KV 綁定 `ZUPU_KV`。
+`worker/zupu-module.js` 是同一份後端的獨立模組原稿。燒金紙紀錄（type `paper`）需 v30 以上；舊版後端不認得時只記在本機，其他雲端功能不受影響。
 
 未部署時自動改為本機模式（上香只記在該裝置，語音無法上傳）。
 
